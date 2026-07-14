@@ -44,6 +44,65 @@ export default async function DashboardPage() {
           <StatCard label="Overdue for response" value={stats.overdue} href="/requests?overdue=1" accent />
           <StatCard label="Completed this month" value={stats.completedThisMonth} href="/requests?status=COMPLETED" />
         </section>
+
+        {/* What is a Request vs a Project, and how one becomes the other */}
+        <section
+          className="mt-8 rounded-lg border border-slate-200 bg-white p-5"
+          aria-label="Requests and projects explained"
+        >
+          <h2 className="text-sm font-semibold text-slate-900">Requests &amp; Projects</h2>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-md border border-blue-200 bg-blue-50 p-3">
+              <p className="text-sm font-semibold text-blue-900">A Request</p>
+              <p className="mt-1 text-sm text-slate-600">
+                A customer inquiry — <span className="font-medium">every job starts here</span> when
+                someone submits the intake form. It tracks the customer, category, photos, site
+                visits, notes, communications, and estimates as it moves through the pipeline. Not
+                every request becomes a project (some are declined or cancelled).
+              </p>
+            </div>
+            <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
+              <p className="text-sm font-semibold text-emerald-900">A Project</p>
+              <p className="mt-1 text-sm text-slate-600">
+                The construction work being delivered. It&rsquo;s created once the customer{" "}
+                <span className="font-medium">accepts an estimate</span>, adding a project manager,
+                contract amount, planned/actual dates, and milestones to track the build to
+                completion.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              How a request becomes a project
+            </p>
+            <ol className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+              {[
+                "Request submitted",
+                "Reviewed & contacted",
+                "Site visit",
+                "Estimate sent",
+                "Customer accepts",
+                "Project created",
+              ].map((step, i, arr) => (
+                <li key={step} className="flex items-center gap-2">
+                  <span
+                    className={`rounded-full px-2.5 py-1 font-medium ${
+                      i === arr.length - 1
+                        ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
+                        : "border border-slate-200 bg-slate-50 text-slate-700"
+                    }`}
+                  >
+                    {step}
+                  </span>
+                  {i < arr.length - 1 && (
+                    <span aria-hidden className="text-slate-400">→</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
       </main>
     </>
   );
