@@ -96,6 +96,12 @@ function atHour(base: Date, hour: number): Date {
   return d;
 }
 
+/** A visible, on-brand placeholder image (remote URL — displays without local storage). */
+function photoPlaceholder(label: string, n: number): string {
+  const cap = label.charAt(0).toUpperCase() + label.slice(1);
+  return `https://placehold.co/1024x768/024988/ffffff/png?text=${encodeURIComponent(`DCS ${cap} ${n}`)}`;
+}
+
 const PLACEHOLDER_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
   "base64",
@@ -213,7 +219,7 @@ async function main() {
         photos: hasPhotos
           ? {
               create: [1, 2].map((n) => ({
-                storageKey: "seed/placeholder.png",
+                storageKey: photoPlaceholder(category.name, n),
                 fileName: `photo-${n}.png`,
                 contentType: "image/png",
                 sizeBytes: PLACEHOLDER_PNG.length,
@@ -393,7 +399,7 @@ async function main() {
         createdAt: created,
         photos: {
           create: [1, 2, 3, 4].map((n) => ({
-            storageKey: "seed/placeholder.png",
+            storageKey: photoPlaceholder(sc.photoPrefix, n),
             fileName: `${sc.photoPrefix}-${n}.png`,
             contentType: "image/png",
             sizeBytes: PLACEHOLDER_PNG.length,

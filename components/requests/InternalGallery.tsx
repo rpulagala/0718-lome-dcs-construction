@@ -9,6 +9,15 @@ interface Photo {
   fileName: string;
 }
 
+/**
+ * A stored photo's `storageKey` is either a full URL (Vercel Blob / seeded
+ * placeholder) — used directly — or a local key served through the auth-guarded
+ * /api/files route.
+ */
+function srcFor(storageKey: string): string {
+  return /^https?:\/\//i.test(storageKey) ? storageKey : `/api/files/${storageKey}`;
+}
+
 export function InternalGallery({ photos }: { photos: Photo[] }) {
   const [open, setOpen] = useState<number | null>(null);
 
@@ -53,7 +62,7 @@ export function InternalGallery({ photos }: { photos: Photo[] }) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`/api/files/${p.storageKey}`}
+                src={srcFor(p.storageKey)}
                 alt={p.fileName}
                 className="h-full w-full object-cover"
               />
@@ -74,7 +83,7 @@ export function InternalGallery({ photos }: { photos: Photo[] }) {
           <div className="relative max-h-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/files/${active.storageKey}`}
+              src={srcFor(active.storageKey)}
               alt={active.fileName}
               className="max-h-[80vh] rounded-lg bg-white object-contain"
             />
