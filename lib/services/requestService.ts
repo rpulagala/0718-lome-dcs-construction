@@ -7,8 +7,24 @@ import { logger } from "@/lib/logger";
 import type { WorkRequestInput } from "@/lib/validation/workRequest";
 import { renderConfirmation, renderInternalNewRequest } from "./emailTemplates";
 import { sendEmail } from "./mailService";
+import { getSetting } from "./settings";
+import { intakeRecipientsSchema } from "@/lib/validation/admin";
 
 const RESPONSE_SLA_HOURS = 48;
+
+/**
+ * Intake alert recipients come from the admin-managed setting when configured,
+ * falling back to the `INTAKE_NOTIFY_EMAILS` env list. Never throws.
+ */
+async function resolveIntakeRecipients(): Promise<string[]> {
+  try {
+    const parsed = intakeRecipientsSchema.safeParse(await getSetting("intake_notify_emails"));
+    if (parsed.success && parsed.data.emails.length > 0) return parsed.data.emails;
+  } catch {
+    // fall through to env default
+  }
+  return env.INTAKE_NOTIFY_EMAILS;
+}
 
 export interface CreateResult {
   id: string;
@@ -166,7 +182,8 @@ export async function createWorkRequest(
       ...confirmation,
     });
 
-    for (const to of env.INTAKE_NOTIFY_EMAILS) {
+    const intakeRecipients = await resolveIntakeRecipients();
+    for (const to of intakeRecipients) {
       const alert = renderInternalNewRequest({
         requestNumber: created.requestNumber,
         categoryName: created.categoryName,

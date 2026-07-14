@@ -204,6 +204,41 @@ Open the console: ${link}`;
   return { subject, html, text };
 }
 
+export interface UserInviteData {
+  name: string;
+  email: string;
+  roleLabel: string;
+  temporaryPassword: string;
+}
+
+export function renderUserInvite(d: UserInviteData): RenderedEmail {
+  const subject = "Your DCS Construction console account";
+  const link = `${env.APP_BASE_URL}/signin`;
+  const html = shell(
+    "You've been invited to the DCS Construction console",
+    `<p>Hi ${d.name},</p>
+     <p>An account has been created for you as <strong>${d.roleLabel}</strong>. Sign in with the temporary credentials below and change your password once you're in.</p>
+     <table style="font-size:14px;margin:12px 0">
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">Email</td><td><strong>${d.email}</strong></td></tr>
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">Temporary password</td><td><strong>${d.temporaryPassword}</strong></td></tr>
+     </table>
+     <p><a href="${link}">Sign in to the console</a></p>
+     <p style="font-size:13px;color:#64748b">If you weren't expecting this, please contact your administrator.</p>`,
+  );
+  const text = `Hi ${d.name},
+
+An account has been created for you as ${d.roleLabel}. Sign in with the temporary credentials below and change your password once you're in.
+
+Email: ${d.email}
+Temporary password: ${d.temporaryPassword}
+
+Sign in: ${link}
+
+If you weren't expecting this, please contact your administrator.
+— DCS Construction`;
+  return { subject, html, text };
+}
+
 export interface InternalAlertData {
   requestNumber: string;
   categoryName: string;

@@ -1,9 +1,10 @@
 # DCS Construction — Security & Privacy
 
-> **Status — 2026-07-13 (through Phase 2):**
+> **Status — 2026-07-14 (through Phase 5):**
 > **Implemented & verified** — bcrypt (cost 12) credentials auth; deactivated-user rejection; server-side RBAC via `can(action)`; split edge/Node auth config; upload magic-byte validation + size/count limits + filename sanitization + randomized storage keys + private storage behind the auth-guarded `/api/files` route (401 without a session); per-IP rate limiting on the public upload/submit endpoints; idempotency on submission; safe user-facing error messages; secrets via env vars (`.env` git-ignored); structured logging that omits secrets.
 > Phase 3 adds **server-side authorization on every internal mutation** — status change, assignment, priority, and notes go through server actions gated by `requireCan(...)`; the state machine rejects invalid transitions server-side; internal photos are served only to authenticated staff.
-> **Pending (later phases)** — full `AuditLog` coverage (Phase 5), signed/expiring customer status links (Phase 4/5), CAPTCHA/bot provider wiring (seam only today), security-header hardening + least-privilege DB role + the full security review (Phase 7).
+> Phase 5 adds the **admin area** — every user/category/settings mutation is gated by `requireCan("admin:*")` and edge middleware (an EMPLOYEE is redirected from all `/admin` routes; verified), guarded against removing the last active principal admin and self-deactivation, and writes an **`AuditLog`** entry (login, user create/role-change/activate/deactivate/invite-resend, category create/update/reorder/activate/deactivate/delete, settings update) via the append-only `recordAudit` writer.
+> **Pending (later phases)** — signed/expiring customer status links, CAPTCHA/bot provider wiring (seam only today), security-header hardening + least-privilege DB role + the full security review (Phase 7). AuditLog coverage of assignment/status changes still relies on the per-request history tables plus the timeline; broaden into `AuditLog` if needed in Phase 7.
 
 ## Threat model summary
 Public-facing intake form (unauthenticated, accepts file uploads) + internal RBAC console holding customer PII. Primary risks: spam/abuse of the public form, malicious uploads, IDOR on request/photo access, privilege escalation, PII leakage.

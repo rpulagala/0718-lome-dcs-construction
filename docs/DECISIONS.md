@@ -1,6 +1,6 @@
 # DCS Construction — Decisions & Assumptions (ADR log)
 
-> **Status — 2026-07-13:** Entries reflect Phases 0–2 (foundation + public intake). Actual installed stack: Next.js 16 · React 19 · Tailwind v4 · Prisma 7 (pg driver adapter) · Auth.js v5 · shadcn/ui on `@base-ui/react`. New decisions are appended as later phases proceed.
+> **Status — 2026-07-14:** Entries reflect Phases 0–5 (foundation + public intake + internal management + scheduling + admin). Actual installed stack: Next.js 16 · React 19 · Tailwind v4 · Prisma 7 (pg driver adapter) · Auth.js v5 · shadcn/ui on `@base-ui/react`. New decisions are appended as later phases proceed.
 
 Format: decision — rationale. Assumptions are MVP defaults; revisit if the client specifies otherwise.
 
@@ -59,6 +59,14 @@ Format: decision — rationale. Assumptions are MVP defaults; revisit if the cli
 - **Times & timezone**: form inputs are `YYYY-MM-DD` + `HH:MM` strings combined via `combineDateTime` in the server's local time, which the MVP treats as the company tz. Display uses `formatInCompanyTz` (Intl with `COMPANY_TIMEZONE`). A tz-aware picker is deferred.
 - **Calendar integration is a seam, not a sync**: `CalendarProvider` interface + `noopCalendarProvider`, plus a real, standards-compliant `.ics` export (`buildICalEvent`) served from `GET /api/calendar/[siteVisitId]` (auth-guarded). No external Google/Outlook calls in the MVP — non-blocking as planned.
 - **`/signin` Suspense fix** (incidental): wrapped the `useSearchParams` form in `<Suspense>` so `next build` prerenders it — the build previously failed here. Unrelated to scheduling but required to keep the repo's build green.
+
+## Phase 5 notes
+- **Audit is append-only and non-fatal.** `recordAudit(entry, tx?)` writes an `AuditLog` row; outside a transaction a write failure is logged and swallowed so it can never break the action being audited, but when a `tx` is supplied it re-throws so the audit is atomic with the mutation. Action names are a fixed `AuditAction` string union — stored verbatim and mapped to friendly labels in the audit view.
+- **Settings are typed JSON, validated per key.** Each `CompanySetting` key has a matching Zod schema in `SETTING_SCHEMAS`; `updateSetting` validates before upsert and `getAllSettings` fills missing keys from `SETTING_DEFAULTS`, so callers always get a well-formed shape. Intake alert recipients now resolve from the `intake_notify_emails` setting, falling back to the `INTAKE_NOTIFY_EMAILS` env list.
+- **Last-admin & self-lockout guards.** `updateUser` (role change away from admin) and `setUserActive` (deactivate) both refuse when the target is the only remaining active principal admin; you also cannot deactivate your own account. This prevents locking the org out of the admin area.
+- **Invites use a rotating temporary password**, not a reset-token flow (no customer-style magic link for staff in the MVP). `inviteUser`/`resendInvite` generate a high-entropy temp password, store its bcrypt hash, and email it in log/preview mode. A proper "set your password" flow is deferred.
+- **Categories: deactivate over delete.** `deleteCategory` is blocked whenever any `WorkRequest` references the category (history preservation); reorder swaps `sortOrder` with the adjacent category (boundary moves are no-ops). New categories append to the end of the ordering.
+- **Two-layer admin authz.** Edge middleware (`auth.config.ts`) redirects non-`PRINCIPAL_ADMIN` users away from `/admin/*`, and every admin page/server action independently calls `requireCan("admin:*")` — hiding UI is never the control. Verified at runtime: an EMPLOYEE session is 307-redirected from all `/admin` routes.
 
 ## Open questions (non-blocking; proceeding with defaults)
 - Real project gallery content and brand assets (logo, colors) from client.

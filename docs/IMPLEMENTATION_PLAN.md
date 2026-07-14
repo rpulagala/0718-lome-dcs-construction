@@ -1,6 +1,6 @@
 # DCS Construction — Detailed Project Plan
 
-> **Build status — 2026-07-14:** Phases **0–4 complete and verified**; **Phase 5 (Admin & Configuration) is next**. 68 tests passing (unit + integration), typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (7 users, 14 categories, 5 settings, 26 work requests, photos, site visits, estimates, 2 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md).
+> **Build status — 2026-07-14:** Phases **0–5 complete and verified**; **Phase 6 (Estimates & Projects) is next**. 95 tests passing (unit + integration), typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (7 users, 14 categories, 5 settings, 26 work requests, photos, site visits, estimates, 2 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md).
 >
 > | Phase | State |
 > |---|---|
@@ -9,8 +9,8 @@
 > | 2 — Public intake | ✅ Complete & verified |
 > | 3 — Internal request management | ✅ Complete & verified |
 > | 4 — Scheduling & communication | ✅ Complete & verified |
-> | 5 — Admin & configuration | ⬜ Next |
-> | 6 — Estimates & projects | ⬜ Pending |
+> | 5 — Admin & configuration | ✅ Complete & verified |
+> | 6 — Estimates & projects | ⬜ Next |
 > | 7 — Testing & hardening | ⬜ Pending |
 
 > Work intake & tracking web application (production-ready MVP)
@@ -166,14 +166,27 @@ Each phase ends with the **gate**: lint → typecheck → relevant tests → fix
 - Email templates: `renderSiteVisitScheduled` / `Rescheduled` / `Cancelled` + `renderEmployeeVisitAssignment`.
 - Tests: `tests/unit/scheduling.test.ts`, `tests/integration/scheduling.test.ts` (schedule, double-booking, reschedule, cancel, complete, notification logging, communication + tasks).
 
-### Phase 5 — Admin & Configuration
+### Phase 5 — Admin & Configuration  ✅ Complete
 **Model: Sonnet 5** + **Opus 4.8** (audit-log correctness spot check)
-- User management (invite/edit/role/activate/deactivate/resend)
-- Project category management (add/rename/reorder/activate; block delete when referenced; preserve history)
-- Company settings (profile, service area, response message, intake recipients, email templates, upload limits)
-- Workflow settings (default status/priority, response target, notification/assignment rules)
-- Audit log capturing the §13 event list
-- **Exit**: admin manages users + categories + settings; audit log records events; server authz blocks non-admins (verified by URL manipulation test).
+- [x] User management (invite/edit/role/activate/deactivate/resend)
+- [x] Project category management (add/rename/reorder/activate; block delete when referenced; preserve history)
+- [x] Company settings (profile, service area, response message, intake recipients, upload limits)
+- [x] Workflow settings (default status/priority, response target, notification/assignment rules)
+- [x] Audit log capturing the §13 event list
+- **Exit**: admin manages users + categories + settings; audit log records events; server authz blocks non-admins (verified by URL manipulation test). ✅
+
+**What shipped:**
+- `lib/services/audit.ts` — `recordAudit(entry, tx?)`: append-only audit writer with a stable `AuditAction` taxonomy; never breaks the action it records (swallows write errors outside a transaction, propagates inside one for atomicity).
+- `lib/services/settings.ts` — typed `getSetting` / `getAllSettings` / `updateSetting` over `CompanySetting`, each value validated against its Zod schema before persistence; audits `settings.update`.
+- `lib/services/userAdmin.ts` — `listUsers` / `inviteUser` / `updateUser` / `setUserActive` / `resendInvite`. Invites create a bcrypt-hashed temporary password + email the invite (log mode); guards prevent removing the last active principal admin and self-deactivation. Audits create/update/role_change/activate/deactivate/invite_resend.
+- `lib/services/categoryAdmin.ts` — `listCategories` (with request counts) / `createCategory` / `updateCategory` / `setCategoryActive` / `reorderCategory` (neighbor swap) / `deleteCategory` (blocked when referenced — deactivate to preserve history). Audits every mutation.
+- `lib/services/auditQueries.ts` — `listAuditLogs` paginated, newest first, actor joined.
+- `lib/validation/admin.ts` — Zod schemas for invites, edits, categories, and each settings key (`SETTING_SCHEMAS`).
+- `auth.ts` now records an `auth.login` audit event on successful sign-in.
+- `lib/services/requestService.ts` — intake alert recipients now resolve from the admin-managed `intake_notify_emails` setting, falling back to `INTAKE_NOTIFY_EMAILS` env.
+- UI: `/admin` overview + `/admin/users`, `/admin/categories`, `/admin/settings`, `/admin/audit` (server components) with `AdminNav`, `UsersManager`, `CategoriesManager`, `SettingsManager` clients; all guarded by `requireCan("admin:*")` and edge middleware.
+- Email template: `renderUserInvite`.
+- Tests: `tests/unit/adminValidation.test.ts` (schemas), `tests/integration/admin.test.ts` (invite/role/activate/last-admin guard/resend, category CRUD + reorder + referenced-delete block, settings validate/persist/audit). Runtime-verified: admin renders all four pages; an EMPLOYEE is 307-redirected from every `/admin` route (URL-manipulation check).
 
 ### Phase 6 — Estimates & Projects
 **Model: Sonnet 5**

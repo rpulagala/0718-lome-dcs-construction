@@ -1,9 +1,10 @@
 # DCS Construction — Test Plan
 
-> **Status — 2026-07-13: 48 tests passing** (8 files), typecheck + lint clean.
-> **Unit (done):** request-number format/parse, status-transition machine, role/`can()` authorization, customer-visible status mapping, business-hours SLA, file validation (magic bytes / size / filename sanitize).
-> **Integration (done):** `createWorkRequest` (persistence + email logging + idempotency); request mutations (`changeStatus` valid/invalid-transition guard + history, `assignRequest` + history, `addNote`, `setPriority`).
-> **Pending:** more integration coverage as features land (site visits, categories, permissions); the 5 Playwright E2E journeys; accessibility + security passes — all scheduled for Phase 7 (Vitest + Playwright configs already in place).
+> **Status — 2026-07-14: 95 tests passing** (12 files), typecheck + lint clean.
+> **Unit (done):** request-number format/parse, status-transition machine, role/`can()` authorization, customer-visible status mapping, business-hours SLA, file validation (magic bytes / size / filename sanitize), scheduling helpers, admin validation schemas (invite/category/settings).
+> **Integration (done):** `createWorkRequest` (persistence + email logging + idempotency); request mutations (`changeStatus` valid/invalid-transition guard + history, `assignRequest` + history, `addNote`, `setPriority`); scheduling (schedule/double-booking/reschedule/cancel/complete + notifications, communication + tasks); admin (user invite/role-change/activate/last-admin guard/resend, category CRUD + reorder + referenced-delete block, settings validate/persist/audit).
+> **Runtime-verified (Phase 5):** admin renders `/admin`, `/admin/users`, `/admin/categories`, `/admin/settings`, `/admin/audit`; an EMPLOYEE is 307-redirected from every `/admin` route (URL-manipulation authz check); `auth.login` audit event appears in the audit view.
+> **Pending:** the 5 Playwright E2E journeys; accessibility + security passes — all scheduled for Phase 7 (Vitest + Playwright configs already in place).
 
 ## Tooling
 - **Vitest** — unit + integration (Node env, Prisma against a test database).

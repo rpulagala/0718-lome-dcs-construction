@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/auth/password";
+import { recordAudit } from "@/lib/services/audit";
 import { logger } from "@/lib/logger";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -32,6 +33,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           data: { lastLoginAt: new Date() },
         });
         logger.info("user.signin", { userId: user.id, role: user.role });
+        await recordAudit({
+          actorId: user.id,
+          action: "auth.login",
+          entityType: "User",
+          entityId: user.id,
+        });
 
         return {
           id: user.id,
