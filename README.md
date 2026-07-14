@@ -2,7 +2,7 @@
 
 Production-ready MVP web application for **DCS Construction**: prospective customers submit construction work requests with photos; DCS staff review, qualify, schedule, assign, track, and complete them through the full lifecycle.
 
-> Status (2026-07-13): **Phases 0–3 complete and verified; Phase 4 next.** Public intake plus the internal console — employee dashboard (summary cards, filter/search/paginate), request detail with photo lightbox, notes, status workflow, and assignment — are working. **48 tests passing**, typecheck + lint clean. Implementation proceeds by phase — see [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).
+> Status (2026-07-14): **Phases 0–4 complete and verified; Phase 5 next.** Public intake plus the internal console — employee dashboard (summary cards, filter/search/paginate), request detail with photo lightbox, notes, status workflow, and assignment — plus **site-visit scheduling** (appointment statuses, reschedule history, double-booking guard, customer + employee notifications), a **communication log**, follow-up tasks, and an internal **calendar view** with iCal export are working. **68 tests passing**, typecheck + lint clean, `next build` green. Implementation proceeds by phase — see [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).
 >
 > Local DB runs via Docker on host port **5433** (5432 was already in use). Start it with `npm run db:up`, then `npm run db:migrate` and `npm run seed`.
 

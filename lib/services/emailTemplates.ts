@@ -82,6 +82,128 @@ We'll be in touch with next steps.
   return { subject, html, text };
 }
 
+export interface SiteVisitData {
+  customerName: string;
+  requestNumber: string;
+  when: string; // pre-formatted, company-tz date/time
+  serviceLocation: string;
+  customerInstructions?: string | null;
+}
+
+export function renderSiteVisitScheduled(d: SiteVisitData): RenderedEmail {
+  const subject = `Site visit scheduled for request ${d.requestNumber}`;
+  const instructions = d.customerInstructions
+    ? `<p style="color:#475569">${d.customerInstructions}</p>`
+    : "";
+  const html = shell(
+    "Your site visit is scheduled",
+    `<p>Hi ${d.customerName},</p>
+     <p>We&rsquo;ve scheduled a site visit for your request <strong>${d.requestNumber}</strong>.</p>
+     <table style="font-size:14px;margin:12px 0">
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">When</td><td><strong>${d.when}</strong></td></tr>
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">Where</td><td>${d.serviceLocation}</td></tr>
+     </table>
+     ${instructions}
+     <p style="font-size:13px;color:#64748b">Need to change the time? Reply to this email or call our office.</p>`,
+  );
+  const text = `Hi ${d.customerName},
+
+We've scheduled a site visit for your request ${d.requestNumber}.
+
+When: ${d.when}
+Where: ${d.serviceLocation}
+${d.customerInstructions ? `\n${d.customerInstructions}\n` : ""}
+Need to change the time? Reply to this email or call our office.
+— DCS Construction`;
+  return { subject, html, text };
+}
+
+export function renderSiteVisitRescheduled(d: SiteVisitData): RenderedEmail {
+  const subject = `Site visit rescheduled for request ${d.requestNumber}`;
+  const html = shell(
+    "Your site visit has been rescheduled",
+    `<p>Hi ${d.customerName},</p>
+     <p>The site visit for your request <strong>${d.requestNumber}</strong> has been moved to a new time.</p>
+     <table style="font-size:14px;margin:12px 0">
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">New time</td><td><strong>${d.when}</strong></td></tr>
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">Where</td><td>${d.serviceLocation}</td></tr>
+     </table>
+     <p style="font-size:13px;color:#64748b">If this time doesn&rsquo;t work, reply to this email or call our office.</p>`,
+  );
+  const text = `Hi ${d.customerName},
+
+The site visit for your request ${d.requestNumber} has been rescheduled.
+
+New time: ${d.when}
+Where: ${d.serviceLocation}
+
+If this time doesn't work, reply to this email or call our office.
+— DCS Construction`;
+  return { subject, html, text };
+}
+
+export interface SiteVisitCancelData {
+  customerName: string;
+  requestNumber: string;
+  reason?: string | null;
+}
+
+export function renderSiteVisitCancelled(d: SiteVisitCancelData): RenderedEmail {
+  const subject = `Site visit cancelled for request ${d.requestNumber}`;
+  const reason = d.reason ? `<p style="color:#475569">Reason: ${d.reason}</p>` : "";
+  const html = shell(
+    "Your site visit has been cancelled",
+    `<p>Hi ${d.customerName},</p>
+     <p>The site visit for your request <strong>${d.requestNumber}</strong> has been cancelled.</p>
+     ${reason}
+     <p>We&rsquo;ll be in touch to arrange a new time. Thank you for your patience.</p>`,
+  );
+  const text = `Hi ${d.customerName},
+
+The site visit for your request ${d.requestNumber} has been cancelled.
+${d.reason ? `Reason: ${d.reason}\n` : ""}
+We'll be in touch to arrange a new time.
+— DCS Construction`;
+  return { subject, html, text };
+}
+
+export interface EmployeeVisitData {
+  requestNumber: string;
+  when: string;
+  serviceLocation: string;
+  customerName: string;
+  action: "scheduled" | "rescheduled" | "cancelled";
+  internalInstructions?: string | null;
+}
+
+export function renderEmployeeVisitAssignment(d: EmployeeVisitData): RenderedEmail {
+  const verb =
+    d.action === "cancelled" ? "cancelled" : d.action === "rescheduled" ? "rescheduled" : "scheduled";
+  const subject = `Site visit ${verb} — ${d.requestNumber}`;
+  const link = `${env.APP_BASE_URL}/dashboard`;
+  const instructions = d.internalInstructions
+    ? `<p style="color:#475569">Instructions: ${d.internalInstructions}</p>`
+    : "";
+  const html = shell(
+    `Site visit ${verb}`,
+    `<table style="font-size:14px;margin:12px 0">
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">Request</td><td><strong>${d.requestNumber}</strong></td></tr>
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">Customer</td><td>${d.customerName}</td></tr>
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">When</td><td>${d.when}</td></tr>
+       <tr><td style="color:#64748b;padding:2px 12px 2px 0">Where</td><td>${d.serviceLocation}</td></tr>
+     </table>
+     ${instructions}
+     <p><a href="${link}">Open the console</a></p>`,
+  );
+  const text = `Site visit ${verb} — ${d.requestNumber}
+Customer: ${d.customerName}
+When: ${d.when}
+Where: ${d.serviceLocation}
+${d.internalInstructions ? `Instructions: ${d.internalInstructions}\n` : ""}
+Open the console: ${link}`;
+  return { subject, html, text };
+}
+
 export interface InternalAlertData {
   requestNumber: string;
   categoryName: string;

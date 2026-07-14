@@ -1,6 +1,6 @@
 # DCS Construction — Detailed Project Plan
 
-> **Build status — 2026-07-13:** Phases **0–3 complete and verified**; **Phase 4 (Scheduling & Communication) is next**. 48 tests passing (unit + integration), typecheck + lint clean. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (7 users, 14 categories, 5 settings, 26 work requests, photos, site visits, estimates, 2 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md).
+> **Build status — 2026-07-14:** Phases **0–4 complete and verified**; **Phase 5 (Admin & Configuration) is next**. 68 tests passing (unit + integration), typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (7 users, 14 categories, 5 settings, 26 work requests, photos, site visits, estimates, 2 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md).
 >
 > | Phase | State |
 > |---|---|
@@ -8,8 +8,8 @@
 > | 1 — Foundation (scaffold, DB, auth) | ✅ Complete & verified |
 > | 2 — Public intake | ✅ Complete & verified |
 > | 3 — Internal request management | ✅ Complete & verified |
-> | 4 — Scheduling & communication | ⬜ Next |
-> | 5 — Admin & configuration | ⬜ Pending |
+> | 4 — Scheduling & communication | ✅ Complete & verified |
+> | 5 — Admin & configuration | ⬜ Next |
 > | 6 — Estimates & projects | ⬜ Pending |
 > | 7 — Testing & hardening | ⬜ Pending |
 
@@ -148,13 +148,23 @@ Each phase ends with the **gate**: lint → typecheck → relevant tests → fix
 - Assignment, priority, follow-up/due dates, tasks, contact attempts; 48-business-hour SLA/overdue indicator
 - **Exit**: employee can find, open, annotate, re-status, and assign requests; every change is on the timeline.
 
-### Phase 4 — Scheduling & Communication
+### Phase 4 — Scheduling & Communication  ✅ Complete
 **Model: Sonnet 5**
-- Site-visit scheduling (fields + appointment statuses + reschedule history), internal calendar view, double-booking guard
-- Customer + assigned-employee notifications on schedule/change/cancel
-- Communication log; follow-up tasks
-- Calendar integration boundary (Google/Outlook) stubbed — **not** blocking
-- **Exit**: visits schedulable, notifications fire & are logged, timeline updated.
+- [x] Site-visit scheduling (fields + appointment statuses + reschedule history), internal calendar view, double-booking guard
+- [x] Customer + assigned-employee notifications on schedule/change/cancel
+- [x] Communication log; follow-up tasks
+- [x] Calendar integration boundary (Google/Outlook) stubbed — **not** blocking (iCal `.ics` export seam + `CalendarProvider` interface)
+- **Exit**: visits schedulable, notifications fire & are logged, timeline updated. ✅
+
+**What shipped:**
+- `lib/domain/scheduling.ts` — pure helpers: `visitWindow`, `rangesOverlap`, `combineDateTime`, active-status set (unit-tested).
+- `lib/services/scheduling.ts` — `scheduleSiteVisit` / `rescheduleSiteVisit` / `cancelSiteVisit` / `completeSiteVisit`. Each records `SiteVisitHistory`, a `WorkRequestActivity`, advances the request status through the guarded state machine (no double-email), and fires customer + assigned-employee notifications post-commit (non-fatal). Double-booking guard via `findVisitConflict`.
+- `lib/services/communication.ts` — `logCommunication`, `createTask`, `toggleTask`.
+- `lib/services/schedulingQueries.ts` — `listSiteVisits` for the calendar.
+- `lib/services/calendarSync.ts` — `CalendarProvider` interface, no-op provider, `buildICalEvent` (.ics). Downloaded via `GET /api/calendar/[siteVisitId]`.
+- UI: `SchedulePanel`, `CommunicationForm`, `TaskList` on the request detail page; new `/calendar` internal view + nav link.
+- Email templates: `renderSiteVisitScheduled` / `Rescheduled` / `Cancelled` + `renderEmployeeVisitAssignment`.
+- Tests: `tests/unit/scheduling.test.ts`, `tests/integration/scheduling.test.ts` (schedule, double-booking, reschedule, cancel, complete, notification logging, communication + tasks).
 
 ### Phase 5 — Admin & Configuration
 **Model: Sonnet 5** + **Opus 4.8** (audit-log correctness spot check)

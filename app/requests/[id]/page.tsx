@@ -7,10 +7,14 @@ import { StatusBadge, PriorityBadge } from "@/components/requests/badges";
 import { ManagePanel } from "@/components/requests/ManagePanel";
 import { NoteForm } from "@/components/requests/NoteForm";
 import { InternalGallery } from "@/components/requests/InternalGallery";
+import { SchedulePanel } from "@/components/requests/SchedulePanel";
+import { CommunicationForm } from "@/components/requests/CommunicationForm";
+import { TaskList } from "@/components/requests/TaskList";
 import { getRequestDetail, assignableUsers } from "@/lib/services/requestQueries";
 import { allowedTransitions } from "@/lib/domain/statusMachine";
 import { toCustomerStatus, internalStatusLabel } from "@/lib/domain/status";
 import { isOverdue } from "@/lib/domain/businessHours";
+import { formatInCompanyTz } from "@/lib/utils";
 
 function fmt(d: Date | null | undefined) {
   if (!d) return "—";
@@ -48,6 +52,26 @@ export default async function RequestDetailPage({
   const overdue = isOverdue(r.responseDueAt, r.firstContactedAt);
   const internalNotes = r.notes.filter((n) => n.visibility === "INTERNAL");
   const customerNotes = r.notes.filter((n) => n.visibility === "CUSTOMER_VISIBLE");
+  const users = await assignableUsers();
+
+  const visits = r.siteVisits.map((v) => ({
+    id: v.id,
+    whenLabel: formatInCompanyTz(v.scheduledDate),
+    status: v.status,
+    assignedToId: v.assignedToId,
+    assignedToName: v.assignedTo?.name ?? null,
+    customerInstructions: v.customerInstructions,
+    internalInstructions: v.internalInstructions,
+    cancellationReason: v.cancellationReason,
+  }));
+
+  const tasks = r.tasks.map((t) => ({
+    id: t.id,
+    title: t.title,
+    isComplete: t.isComplete,
+    dueLabel: t.dueAt ? formatInCompanyTz(t.dueAt, { dateStyle: "medium" }) : null,
+    assigneeName: t.assignee?.name ?? null,
+  }));
 
   return (
     <>
@@ -155,6 +179,28 @@ export default async function RequestDetailPage({
               </Card>
             )}
 
+            <TaskList requestId={r.id} tasks={tasks} users={users} />
+
+            <CommunicationForm requestId={r.id} />
+
+            <Card title={`Communication log (${r.communications.length})`}>
+              {r.communications.length === 0 ? (
+                <p className="text-sm text-slate-400">No communications logged yet.</p>
+              ) : (
+                <ul className="space-y-3" data-testid="comm-log">
+                  {r.communications.map((c) => (
+                    <li key={c.id} className="text-sm">
+                      <div className="text-slate-800">{c.summary}</div>
+                      <div className="text-xs text-slate-400">
+                        {c.direction === "INBOUND" ? "Inbound" : "Outbound"} {c.channel.toLowerCase()} ·{" "}
+                        {c.loggedBy.name} · {fmt(c.occurredAt)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
             <Card title="Activity timeline">
               <ol className="space-y-2" data-testid="timeline">
                 {r.activities.map((a) => (
@@ -180,8 +226,15 @@ export default async function RequestDetailPage({
               currentPriority={r.priority}
               currentAssigneeId={r.assignedTo?.id ?? null}
               allowedStatuses={allowedTransitions(r.status)}
-              users={await assignableUsers()}
+              users={users}
               canAssign={can(user.role, "request:assign")}
+            />
+
+            <SchedulePanel
+              requestId={r.id}
+              visits={visits}
+              users={users}
+              defaultAssigneeId={r.assignedTo?.id ?? null}
             />
 
             <Card title="At a glance">

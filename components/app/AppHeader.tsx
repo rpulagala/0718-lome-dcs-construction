@@ -27,6 +27,9 @@ export function AppHeader({
             <Link href="/requests" className="text-slate-600 hover:text-slate-900">
               Requests
             </Link>
+            <Link href="/calendar" className="text-slate-600 hover:text-slate-900">
+              Calendar
+            </Link>
             {isAdmin && (
               <Link href="/admin" className="text-slate-600 hover:text-slate-900">
                 Admin

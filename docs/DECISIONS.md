@@ -51,6 +51,15 @@ Format: decision — rationale. Assumptions are MVP defaults; revisit if the cli
 - **Seed advances `RequestCounter`** to the number of seeded requests so newly submitted requests don't collide with seeded request numbers.
 - **Internal photos** render via `/api/files/<storageKey>` (auth-guarded); seed writes a shared placeholder image to `.storage/seed/`.
 
+## Phase 4 notes
+- **Double-booking guard** is time-window based: a conflict is any *active* (`PROPOSED`/`CONFIRMED`/`RESCHEDULED`) visit for the same employee whose window overlaps. Visits with no end time assume a 60-minute default duration (`DEFAULT_VISIT_MINUTES`). Adjacent/touching windows do **not** conflict (half-open `[start, end)`).
+- **Status advancement is decoupled from the generic status email.** Scheduling helpers advance the request status inside the same transaction (`advanceStatusTx`) but send a *dedicated* site-visit email rather than routing through `changeStatus` — this avoids double-notifying the customer for the same event. `advanceStatusTx` is a no-op when the transition isn't allowed by the state machine, so scheduling never breaks on an unexpected status.
+- **Cancelling the last active visit** moves the request back to `SITE_VISIT_TO_SCHEDULE` (guarded by the state machine); cancelling while another visit is still active leaves the status untouched.
+- **Reschedule** sets the visit's `AppointmentStatus` to `RESCHEDULED` and records a `SiteVisitHistory` row with previous/new dates; it does not change the request-level status.
+- **Times & timezone**: form inputs are `YYYY-MM-DD` + `HH:MM` strings combined via `combineDateTime` in the server's local time, which the MVP treats as the company tz. Display uses `formatInCompanyTz` (Intl with `COMPANY_TIMEZONE`). A tz-aware picker is deferred.
+- **Calendar integration is a seam, not a sync**: `CalendarProvider` interface + `noopCalendarProvider`, plus a real, standards-compliant `.ics` export (`buildICalEvent`) served from `GET /api/calendar/[siteVisitId]` (auth-guarded). No external Google/Outlook calls in the MVP — non-blocking as planned.
+- **`/signin` Suspense fix** (incidental): wrapped the `useSearchParams` form in `<Suspense>` so `next build` prerenders it — the build previously failed here. Unrelated to scheduling but required to keep the repo's build green.
+
 ## Open questions (non-blocking; proceeding with defaults)
 - Real project gallery content and brand assets (logo, colors) from client.
 - Exact service area boundaries.
