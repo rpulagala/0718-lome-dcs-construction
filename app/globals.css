@@ -131,7 +131,8 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    /* Brand typeface (Source Sans 3 — Freight Sans match) app-wide to mirror dcsconstructs.com */
+    font-family: var(--font-brand), ui-sans-serif, system-ui, -apple-system, sans-serif;
   }
 }
 

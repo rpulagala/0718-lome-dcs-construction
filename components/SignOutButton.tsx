@@ -8,7 +8,7 @@ export function SignOutButton() {
       type="button"
       onClick={() => signOut({ redirectTo: "/signin" })}
       data-testid="signout"
-      className="rounded-md border border-blue-300/50 px-3 py-1.5 text-sm font-medium text-blue-50 hover:bg-blue-800"
+      className="rounded-full border border-white/40 px-4 py-1.5 text-[12px] font-normal uppercase tracking-[0.12em] text-white transition-colors hover:bg-white/10"
     >
       Sign out
     </button>
