@@ -30,7 +30,7 @@ export function CommunicationForm({ requestId }: { requestId: string }) {
   const input = "h-9 rounded-md border border-slate-300 px-2 text-sm";
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div>
       <h3 className="text-sm font-semibold text-slate-900">Log communication</h3>
       <div className="mt-2 flex gap-2">
         <select

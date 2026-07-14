@@ -254,25 +254,32 @@ export default async function RequestDetailPage({
 
             <TaskList requestId={r.id} tasks={tasks} users={users} />
 
-            <CommunicationForm requestId={r.id} />
-
-            <Card title={`Communication log (${r.communications.length})`}>
-              {r.communications.length === 0 ? (
-                <p className="text-sm text-slate-400">No communications logged yet.</p>
-              ) : (
-                <ul className="space-y-3" data-testid="comm-log">
-                  {r.communications.map((c) => (
-                    <li key={c.id} className="text-sm">
-                      <div className="text-slate-800">{c.summary}</div>
-                      <div className="text-xs text-slate-400">
-                        {c.direction === "INBOUND" ? "Inbound" : "Outbound"} {c.channel.toLowerCase()} ·{" "}
-                        {c.loggedBy.name} · {fmt(c.occurredAt)}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Card>
+            {/* Communication — one card: log form + communication log */}
+            <section className="rounded-lg border border-slate-200 bg-white">
+              <div className="p-4">
+                <CommunicationForm requestId={r.id} />
+              </div>
+              <div className="border-t border-slate-100 p-4">
+                <h2 className="mb-2 text-sm font-semibold text-slate-900">
+                  Communication log ({r.communications.length})
+                </h2>
+                {r.communications.length === 0 ? (
+                  <p className="text-sm text-slate-400">No communications logged yet.</p>
+                ) : (
+                  <ul className="space-y-3" data-testid="comm-log">
+                    {r.communications.map((c) => (
+                      <li key={c.id} className="text-sm">
+                        <div className="text-slate-800">{c.summary}</div>
+                        <div className="text-xs text-slate-400">
+                          {c.direction === "INBOUND" ? "Inbound" : "Outbound"} {c.channel.toLowerCase()} ·{" "}
+                          {c.loggedBy.name} · {fmt(c.occurredAt)}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
 
             <EstimatesPanel requestId={r.id} estimates={estimates} canManage={canEstimate} />
 
