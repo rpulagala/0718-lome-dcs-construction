@@ -21,13 +21,14 @@ export default async function RequestPage() {
   return (
     <>
       <SiteHeader />
-      <main className="max-w-3xl px-6 py-12">
-        <h1 className="text-3xl font-bold text-slate-900">Request a Site Visit</h1>
-        <p className="mt-2 text-slate-600">
-          Share a few details about your project and our team will get back to you
-          within 48 business hours. Fields marked with * are required.
+      <main className="max-w-3xl px-6 py-14 font-brand text-brand-ink">
+        <h1 className="text-4xl font-light tracking-wide text-brand-ink">Contact Us</h1>
+        <p className="mt-3 max-w-xl text-[17px] font-light leading-relaxed text-brand-navy">
+          Please take a moment to tell us about yourself and your project and we&rsquo;ll
+          get back to you as soon as possible with your free project estimate.
+          Fields marked with * are required.
         </p>
-        <div className="mt-8">
+        <div className="mt-10">
           <WorkRequestForm
             categories={categories}
             maxPhotos={env.MAX_UPLOAD_FILES}

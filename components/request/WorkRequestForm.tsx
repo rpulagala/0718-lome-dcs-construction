@@ -81,13 +81,13 @@ export function WorkRequestForm({ categories, maxPhotos, maxMb }: Props) {
   return (
     <form
       onSubmit={handleSubmit(onValid)}
-      className="space-y-8"
+      className="brand-form space-y-10 font-brand text-brand-ink"
       data-testid="work-request-form"
       noValidate
     >
       {/* Contact */}
       <fieldset className="space-y-4">
-        <legend className="text-lg font-semibold text-slate-900">
+        <legend className="border-b border-slate-200 pb-2 text-2xl font-light tracking-wide text-brand-ink">
           Your contact information
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -125,7 +125,7 @@ export function WorkRequestForm({ categories, maxPhotos, maxMb }: Props) {
 
       {/* Location */}
       <fieldset className="space-y-4">
-        <legend className="text-lg font-semibold text-slate-900">
+        <legend className="border-b border-slate-200 pb-2 text-2xl font-light tracking-wide text-brand-ink">
           Project location
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -159,7 +159,7 @@ export function WorkRequestForm({ categories, maxPhotos, maxMb }: Props) {
 
       {/* Project */}
       <fieldset className="space-y-4">
-        <legend className="text-lg font-semibold text-slate-900">
+        <legend className="border-b border-slate-200 pb-2 text-2xl font-light tracking-wide text-brand-ink">
           About your project
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -219,7 +219,7 @@ export function WorkRequestForm({ categories, maxPhotos, maxMb }: Props) {
 
       {/* Photos */}
       <fieldset className="space-y-3">
-        <legend className="text-lg font-semibold text-slate-900">
+        <legend className="border-b border-slate-200 pb-2 text-2xl font-light tracking-wide text-brand-ink">
           Project photos
         </legend>
         <p className="text-sm text-slate-500">
@@ -231,7 +231,7 @@ export function WorkRequestForm({ categories, maxPhotos, maxMb }: Props) {
 
       {/* Consent */}
       <fieldset className="space-y-3">
-        <legend className="text-lg font-semibold text-slate-900">
+        <legend className="border-b border-slate-200 pb-2 text-2xl font-light tracking-wide text-brand-ink">
           Permissions
         </legend>
         <label className="flex items-start gap-2 text-sm text-slate-700">
@@ -269,14 +269,16 @@ export function WorkRequestForm({ categories, maxPhotos, maxMb }: Props) {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        data-testid="submit-request"
-        className="w-full rounded-md bg-slate-900 px-4 py-2.5 font-medium text-white hover:bg-slate-800 disabled:opacity-60 sm:w-auto"
-      >
-        {isSubmitting ? "Submitting…" : "Submit request"}
-      </button>
+      <div className="pt-2">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          data-testid="submit-request"
+          className="rounded-full bg-brand-red px-10 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition-colors hover:bg-brand-red-dark disabled:opacity-60"
+        >
+          {isSubmitting ? "Submitting…" : "Submit"}
+        </button>
+      </div>
     </form>
   );
 }
