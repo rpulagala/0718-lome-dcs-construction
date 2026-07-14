@@ -58,6 +58,30 @@ ${d.statusUrl ? `\nTrack your request: ${d.statusUrl}\n` : ""}
   return { subject, html, text };
 }
 
+export interface StatusUpdateData {
+  customerName: string;
+  requestNumber: string;
+  customerStatus: string;
+}
+
+export function renderStatusUpdate(d: StatusUpdateData): RenderedEmail {
+  const subject = `Update on your request ${d.requestNumber}`;
+  const html = shell(
+    "Your request has an update",
+    `<p>Hi ${d.customerName},</p>
+     <p>The status of your request <strong>${d.requestNumber}</strong> is now:
+       <strong>${d.customerStatus}</strong>.</p>
+     <p>We&rsquo;ll be in touch with next steps. Thank you for choosing DCS Construction.</p>`,
+  );
+  const text = `Hi ${d.customerName},
+
+The status of your request ${d.requestNumber} is now: ${d.customerStatus}.
+
+We'll be in touch with next steps.
+— DCS Construction`;
+  return { subject, html, text };
+}
+
 export interface InternalAlertData {
   requestNumber: string;
   categoryName: string;

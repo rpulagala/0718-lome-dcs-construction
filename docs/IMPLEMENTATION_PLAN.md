@@ -1,14 +1,14 @@
 # DCS Construction — Detailed Project Plan
 
-> **Build status — 2026-07-13:** Phases **0, 1, 2 complete and verified**; **Phase 3 (Internal Request Management) is next**. 42 tests passing (unit + integration), typecheck + lint clean. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (7 users, 14 categories, 5 settings). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md).
+> **Build status — 2026-07-13:** Phases **0–3 complete and verified**; **Phase 4 (Scheduling & Communication) is next**. 48 tests passing (unit + integration), typecheck + lint clean. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (7 users, 14 categories, 5 settings, 26 work requests, photos, site visits, estimates, 2 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md).
 >
 > | Phase | State |
 > |---|---|
 > | 0 — Discovery & documentation | ✅ Complete |
 > | 1 — Foundation (scaffold, DB, auth) | ✅ Complete & verified |
 > | 2 — Public intake | ✅ Complete & verified |
-> | 3 — Internal request management | ⬜ Next |
-> | 4 — Scheduling & communication | ⬜ Pending |
+> | 3 — Internal request management | ✅ Complete & verified |
+> | 4 — Scheduling & communication | ⬜ Next |
 > | 5 — Admin & configuration | ⬜ Pending |
 > | 6 — Estimates & projects | ⬜ Pending |
 > | 7 — Testing & hardening | ⬜ Pending |
@@ -138,7 +138,7 @@ Each phase ends with the **gate**: lint → typecheck → relevant tests → fix
 - Confirmation page + confirmation email (via MailService, logged)
 - **Exit**: a customer can submit w/ photos, gets confirmation page + email, record persists; email failure does **not** fail the submission.
 
-### Phase 3 — Internal Request Management
+### Phase 3 — Internal Request Management  ✅ Complete
 **Model: Sonnet 5** (dashboard/detail) + **Opus 4.8** (status state machine)
 - Employee dashboard: summary cards, work-request table (sort/filter/search/paginate, mobile cards, empty/loading/error states)
 - Filters + cross-field search per prompt §7; default view surfaces new + overdue

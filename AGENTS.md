@@ -9,7 +9,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 Construction work intake & tracking web app (production-ready MVP). Full requirements: `project_requirement.txt`; original concept: `DCS Construction Site Map 3 (1).pdf`. Read `docs/` before making changes — especially [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) (phases + status), [DATA_MODEL.md](docs/DATA_MODEL.md), [ARCHITECTURE.md](docs/ARCHITECTURE.md), [SECURITY.md](docs/SECURITY.md), and [DECISIONS.md](docs/DECISIONS.md).
 
 ## Status — 2026-07-13
-Phases **0, 1, 2 complete and verified**; **Phase 3 (Internal Request Management) is next**. 42 tests passing, typecheck + lint clean.
+Phases **0–3 complete and verified**; **Phase 4 (Scheduling & Communication) is next**. 48 tests passing, typecheck + lint clean.
 
 ## Stack (installed)
 Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind v4 · shadcn/ui (`@base-ui/react`) · PostgreSQL · Prisma 7 (pg driver adapter; client at `lib/generated/prisma`) · Auth.js v5 · Vercel Blob (local stub in dev) · Resend (log mode in dev) · Zod 4 · React Hook Form · Vitest · Playwright.

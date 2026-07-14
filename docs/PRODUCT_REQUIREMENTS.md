@@ -1,6 +1,6 @@
 # DCS Construction — Product Requirements (MVP)
 
-> **Status — 2026-07-13:** The **Public customer experience is complete** (Phases 0–2): landing, services + galleries with lightbox, work-request form with photo uploads, atomic submission + confirmation email, and confirmation page. The **Internal** and **Admin** requirements below are documented but **not yet built** (Phases 3–6); testing/accessibility/security hardening is Phase 7. Roles and the data model are fully implemented.
+> **Status — 2026-07-13:** **Public customer experience complete** (Phases 0–2) and **core Internal request management complete** (Phase 3): employee dashboard (summary cards, filter/search/pagination, mobile cards), request detail (customer/location/project info, photo lightbox, internal vs customer-visible notes, activity timeline, status + assignment history), status workflow with server-guarded transitions, assignment, priority, and the overdue/SLA indicator — all server-authorized. **Still pending:** scheduling/site visits (Phase 4), the Admin area (Phase 5), estimates/projects UI (Phase 6), and Phase 7 hardening.
 
 ## Vision
 A responsive web app for DCS Construction that lets prospective customers submit construction work requests (with photos) and lets DCS staff review, qualify, schedule, assign, track, and complete those requests through their full lifecycle.

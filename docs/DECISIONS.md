@@ -44,6 +44,13 @@ Format: decision — rationale. Assumptions are MVP defaults; revisit if the cli
 - **Idempotency**: the form generates a UUID `idempotencyKey` on mount; the server short-circuits duplicates and also catches the unique-constraint race.
 - **Next 16 rename**: `middleware.ts` triggers a "use proxy.ts" deprecation warning. Behavior is unchanged; rename deferred to Phase 7 cleanup.
 
+## Phase 3 notes
+- **Dashboard filtering is a server-rendered GET form** (searchParams-driven) — no client state, shareable/bookmarkable URLs, works without JS. The request table is a server component; only the mutation controls (`ManagePanel`, `NoteForm`) and the photo lightbox are client components.
+- **Mutations go through server actions** (`app/requests/[id]/actions.ts`) gated by `requireCan(...)`, calling `lib/services/requestMutations`. Client controls use `useTransition` + `router.refresh()`; actions call `revalidatePath`.
+- **Status changes are guarded by the state machine** server-side and record `WorkRequestStatusHistory` + a timeline `WorkRequestActivity`; customer-facing statuses trigger a `status_update` email.
+- **Seed advances `RequestCounter`** to the number of seeded requests so newly submitted requests don't collide with seeded request numbers.
+- **Internal photos** render via `/api/files/<storageKey>` (auth-guarded); seed writes a shared placeholder image to `.storage/seed/`.
+
 ## Open questions (non-blocking; proceeding with defaults)
 - Real project gallery content and brand assets (logo, colors) from client.
 - Exact service area boundaries.

@@ -2,6 +2,7 @@
 
 > **Status — 2026-07-13 (through Phase 2):**
 > **Implemented & verified** — bcrypt (cost 12) credentials auth; deactivated-user rejection; server-side RBAC via `can(action)`; split edge/Node auth config; upload magic-byte validation + size/count limits + filename sanitization + randomized storage keys + private storage behind the auth-guarded `/api/files` route (401 without a session); per-IP rate limiting on the public upload/submit endpoints; idempotency on submission; safe user-facing error messages; secrets via env vars (`.env` git-ignored); structured logging that omits secrets.
+> Phase 3 adds **server-side authorization on every internal mutation** — status change, assignment, priority, and notes go through server actions gated by `requireCan(...)`; the state machine rejects invalid transitions server-side; internal photos are served only to authenticated staff.
 > **Pending (later phases)** — full `AuditLog` coverage (Phase 5), signed/expiring customer status links (Phase 4/5), CAPTCHA/bot provider wiring (seam only today), security-header hardening + least-privilege DB role + the full security review (Phase 7).
 
 ## Threat model summary
