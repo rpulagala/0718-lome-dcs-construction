@@ -7,7 +7,7 @@ export default function TermsPage() {
   return (
     <>
       <SiteHeader />
-      <main className="max-w-3xl px-6 py-12 prose prose-slate">
+      <main className="mx-auto max-w-3xl px-6 py-12 prose prose-slate">
         <h1 className="text-2xl font-bold text-slate-900">Terms of Use</h1>
         <p className="mt-4 text-slate-600">
           By submitting a request you confirm the information provided is accurate

@@ -21,7 +21,7 @@ export default async function RequestPage() {
   return (
     <>
       <SiteHeader />
-      <main className="max-w-3xl px-6 py-14 font-brand text-brand-ink">
+      <main className="mx-auto max-w-3xl px-6 py-14 font-brand text-brand-ink">
         <h1 className="text-4xl font-light tracking-wide text-brand-ink">Contact Us</h1>
         <p className="mt-3 max-w-xl text-[17px] font-light leading-relaxed text-brand-navy">
           Please take a moment to tell us about yourself and your project and we&rsquo;ll

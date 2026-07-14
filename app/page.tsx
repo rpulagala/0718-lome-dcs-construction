@@ -21,7 +21,7 @@ export default function HomePage() {
       <SiteHeader />
 
       <section className="bg-slate-900 text-white">
-        <div className="max-w-6xl px-6 py-20">
+        <div className="mx-auto max-w-6xl px-6 py-20">
           <p className="text-sm font-semibold uppercase tracking-wide text-amber-400">
             DCS Construction
           </p>
@@ -50,7 +50,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <main className="max-w-6xl px-6">
+      <main className="mx-auto max-w-6xl px-6">
         <section className="grid gap-6 py-16 sm:grid-cols-3" aria-label="Services">
           {services.map((s) => (
             <div key={s.title} className="rounded-lg border border-slate-200 p-6">
