@@ -21,22 +21,20 @@ export function SiteHeader() {
       <div className="bg-brand-navy">
         <div className="grid grid-cols-3 items-center px-6 py-4">
           <nav className="flex items-center gap-6">
-            <a href="https://www.dcsconstructs.com/" className={navLink}>Home</a>
-            <a href="https://www.dcsconstructs.com/#facilitiesmaintenance-section" className={navLink}>
-              Construction Services
-            </a>
+            <Link href="/" className={navLink}>Home</Link>
+            <Link href="/#construction-services" className={navLink}>Construction Services</Link>
           </nav>
           <div className="text-center">
-            <a
-              href="https://www.dcsconstructs.com/"
+            <Link
+              href="/"
               className="text-2xl font-semibold tracking-[0.35em] text-white"
               aria-label="DCS Construction home"
             >
               DCS
-            </a>
+            </Link>
           </div>
           <nav className="flex items-center justify-end gap-6">
-            <a href="https://www.dcsconstructs.com/#rsvp-section" className={navLink}>Contact</a>
+            <Link href="/request" className={navLink}>Contact</Link>
             <Link href="/signin" className={navLink}>Staff</Link>
           </nav>
         </div>
