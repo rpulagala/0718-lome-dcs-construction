@@ -1,6 +1,6 @@
 # DCS Construction — Detailed Project Plan
 
-> **Build status — 2026-07-14:** Phases **0–7 complete and verified — feature-complete MVP**. **120 unit/integration tests + 11 Playwright E2E tests passing**, typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (7 users, 14 categories, 5 settings, 26 work requests, photos, site visits, estimates, 2 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md).
+> **Build status — 2026-07-14:** Phases **0–7 complete and verified**, then **deployed to production** — **🟢 live at https://0718-lome-dcs-construction.vercel.app** (Vercel + Neon Postgres + Vercel Blob). **120 unit/integration tests + 11 Playwright E2E tests passing**, typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (8 users incl. the real admin, 14 categories, 5 settings, 28 work requests incl. 2 rich showcase jobs, photos, site visits, estimates, 4 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md); deployment details in [DEPLOYMENT.md](DEPLOYMENT.md).
 >
 > | Phase | State |
 > |---|---|
@@ -12,6 +12,7 @@
 > | 5 — Admin & configuration | ✅ Complete & verified |
 > | 6 — Estimates & projects | ✅ Complete & verified |
 > | 7 — Testing & hardening | ✅ Complete & verified |
+> | 8 — Deploy + branding/UX polish | ✅ Complete — live on Vercel |
 
 > Work intake & tracking web application (production-ready MVP)
 > Source of truth: `project_requirement.txt` (the build prompt) + `DCS Construction Site Map 3 (1).pdf` (original 3-year-old rough concept)
@@ -219,6 +220,16 @@ Each phase ends with the **gate**: lint → typecheck → relevant tests → fix
 - `tests/e2e/helpers.ts` (real credentials sign-in), `tests/e2e/auth.spec.ts` (5 authorization negatives: unauth → sign-in on dashboard + request URL, invalid-login error, employee blocked from `/admin` and `/projects`), `tests/e2e/customer-journey.spec.ts` (serial: public intake → confirmation number → admin status change + note → estimate draft/send/accept → project conversion + milestone → cross-project view), `tests/e2e/admin.spec.ts` (users list + category create). All 10 pass headless against a dev server.
 - Security review pass folded into `SECURITY.md` (estimate/project authz, IDOR posture, money handling, audit coverage).
 - New docs: `DEPLOYMENT.md`, `USER_GUIDE.md`, `VALIDATION_REPORT.md`.
+
+### Phase 8 — Deploy + branding/UX polish  ✅ Complete (live)
+**Post-plan work done after the feature build.**
+- [x] **Deployed to Vercel** — **live at https://0718-lome-dcs-construction.vercel.app**. **Neon Postgres** via the Vercel Marketplace; **public Vercel Blob** store for photos (`BLOB_MODE=vercel`). Build (`vercel.json`) runs `prisma migrate deploy` (using `DATABASE_URL_UNPOOLED`) + an idempotent `scripts/createAdmin.ts` + `next build`. Production seeded via a one-time guarded seed step; real admin `rpulagala@gmail.com`.
+- [x] **Public home page rebuilt to mirror dcsconstructs.com** (services, consultation, facilities maintenance, why-choose, contact); every Contact/estimate CTA → `/request`, `Staff` → `/signin`.
+- [x] **Branding** — Source Sans 3 brand font; navy `#024988` / red `#cd0e0e` tokens; navy site + console headers; public centered / internal left-aligned.
+- [x] **Dashboard split from Requests** (`/dashboard` overview + explainer; `/requests` list). **Week-grid calendar** color-coded per employee. **Request-detail sections color-coded** (`lib/ui/tone.ts`); notes + communication grouped into single cards.
+- [x] **Richer seed** — two full-lifecycle showcase requests→projects (`DCS-2026-000027`, `DCS-2026-000028`); seeded photos use remote placeholder images.
+- [x] **Client delivery report** — `DCS_Construction_Delivery_Report.pdf` (in repo root).
+- **Not yet wired in prod (backlog):** real email (Resend key + verified domain), custom domain, self-service password change, deactivating the demo `@dcs.example` accounts, private-blob signed URLs.
 
 ---
 

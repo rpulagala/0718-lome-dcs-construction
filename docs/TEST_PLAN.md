@@ -5,6 +5,7 @@
 > **Integration (done):** `createWorkRequest` (persistence + email logging + idempotency); request mutations (`changeStatus` valid/invalid-transition guard + history, `assignRequest` + history, `addNote`, `setPriority`); scheduling (schedule/double-booking/reschedule/cancel/complete + notifications, communication + tasks); admin (user invite/role-change/activate/last-admin guard/resend, category CRUD + reorder + referenced-delete block, settings validate/persist/audit); **estimates & projects** (create/edit-guard/send+email/accept/decline/revise; convert-to-project + one-project guard; milestone add/complete/delete + sort order; project status mirrored onto the request).
 > **E2E (done, Phase 7):** all 5 journeys below, 10 specs, green headless against a dev server (`npm run test:e2e`).
 > **Runtime-verified:** admin renders `/admin/*`; an EMPLOYEE is redirected from every `/admin` route and from `/projects` (URL-manipulation authz check); the full public-intake → estimate → project pipeline works through the real UI.
+> **Production-verified (live on Vercel):** `/api/health` returns `db:ok`; admin sign-in, the estimate→project flow, and photo display were confirmed on https://0718-lome-dcs-construction.vercel.app.
 
 ## Tooling
 - **Vitest** — unit + integration (Node env, Prisma against a test database).

@@ -1,6 +1,6 @@
 # DCS Construction — Data Model
 
-> **Status — 2026-07-14:** This schema is **implemented** in `prisma/schema.prisma` and applied to the local database (Prisma 7 with the `pg` driver adapter; client generated to `lib/generated/prisma`). Two migrations: `init` and `estimate_counter` (Phase 6). All models exist, including the Phase-6 `EstimateCounter`. The customer-facing status mapping, the `DCS-YYYY-NNNNNN`/`EST-YYYY-NNNNNN` number generators, and the estimate/project state machines are covered by passing unit tests; `createWorkRequest` and the estimate→project pipeline are covered by integration tests.
+> **Status — 2026-07-14:** This schema is **implemented** in `prisma/schema.prisma` and applied to both the local database and **production (Neon Postgres on Vercel)** via `prisma migrate deploy` in the build (Prisma 7 with the `pg` driver adapter; client generated to `lib/generated/prisma`). Two migrations: `init` and `estimate_counter`. All models exist, including `EstimateCounter`. The customer-facing status mapping, the `DCS-YYYY-NNNNNN`/`EST-YYYY-NNNNNN` number generators, and the estimate/project state machines are covered by passing unit tests; `createWorkRequest` and the estimate→project pipeline are covered by integration tests. Seed includes two full-lifecycle showcase jobs (`DCS-2026-000027`, `DCS-2026-000028`).
 
 Normalized PostgreSQL schema via Prisma. UUID primary keys, separate human-readable request numbers, full history/audit preservation, soft-delete/archival for business records, UTC storage.
 

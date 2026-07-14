@@ -1,6 +1,8 @@
 # DCS Construction — Final Validation Report
 
-**Date:** 2026-07-14 · **Build:** Phases 0–7 complete · **Verdict: Definition of Done met for the MVP.**
+**Date:** 2026-07-14 · **Build:** Phases 0–7 complete + deployed · **Verdict: Definition of Done met — MVP is live in production.**
+
+**🟢 Deployed:** https://0718-lome-dcs-construction.vercel.app (Vercel + Neon Postgres + Vercel Blob). Production `/api/health` returns `{status:ok, db:ok}`; sign-in, the estimate→project flow, and photo display were verified on the live site.
 
 ## Gate status
 | Gate | Result |
@@ -10,7 +12,8 @@
 | `npm run test` (Vitest) | ✅ **120 passing** (9 unit + 5 integration files) |
 | `npm run test:e2e` (Playwright) | ✅ **11 passing** (4 spec files) |
 | `npm run build` (`next build`) | ✅ green (19 routes) |
-| `/api/health` | ✅ `{status:ok, db:ok}` |
+| `/api/health` (local + production) | ✅ `{status:ok, db:ok}` |
+| Production deploy (Vercel) | ✅ live, migrations + seed applied |
 
 ## Definition of Done (prompt §24) — evidence
 | Requirement | Status | Where |

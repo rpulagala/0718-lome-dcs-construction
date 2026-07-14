@@ -1,6 +1,9 @@
 # DCS Construction — Pages & Logins
 
-App runs locally at **http://localhost:3000** (`npm run dev` from the project root; DB via Docker on port 5433).
+**🟢 Live in production:** **https://0718-lome-dcs-construction.vercel.app** (Vercel + Neon + Blob).
+Local dev runs at **http://localhost:3000** (`npm run dev` from the project root; DB via Docker on port 5433). Page paths below are the same on both — prefix with the production URL or `http://localhost:3000`.
+
+**Production admin login:** `rpulagala@gmail.com` (password set at deploy via `INITIAL_ADMIN_PASSWORD`; change/rotate as needed). The seeded demo accounts below **also exist in production** with password `Password123!` — deactivate them via Admin → Users before real-world use.
 
 ## Public pages (no login — centered, client-branded)
 | Page | URL |

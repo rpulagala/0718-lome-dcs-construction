@@ -1,6 +1,6 @@
 # DCS Construction — Product Requirements (MVP)
 
-> **Status — 2026-07-14:** **Public customer experience complete** (Phases 0–2), **Internal request management complete** (Phase 3), **Scheduling & communication complete** (Phase 4), and **Admin & configuration complete** (Phase 5): principal-admin area for user management (invite/role/activate/deactivate/resend), project-category management (add/rename/reorder/activate, referenced-delete guard), company + workflow settings, and an audit log — all server-authorized (`requireCan("admin:*")` + edge middleware). **Still pending:** estimates/projects UI (Phase 6) and Phase 7 hardening.
+> **Status — 2026-07-14: All MVP requirements complete and LIVE in production** — https://0718-lome-dcs-construction.vercel.app (Vercel + Neon + Blob). Public customer experience (Phases 0–2), internal request management (Phase 3), scheduling & communication (Phase 4), admin & configuration (Phase 5), estimates & projects (Phase 6), testing & hardening (Phase 7), and deploy + branding/UX polish (Phase 8) are all done. The public site now mirrors dcsconstructs.com and its Contact/estimate CTAs feed the online intake form. 120 unit/integration + 11 E2E tests pass. See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) and [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Vision
 A responsive web app for DCS Construction that lets prospective customers submit construction work requests (with photos) and lets DCS staff review, qualify, schedule, assign, track, and complete those requests through their full lifecycle.

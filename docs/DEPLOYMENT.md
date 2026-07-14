@@ -2,6 +2,19 @@
 
 Production-ready MVP. Target platform: **Vercel** (Next.js App Router) with a managed **PostgreSQL** database, **Vercel Blob** for photos, and **Resend** for email. Nothing here is Vercel-locked — any Node host + Postgres works.
 
+## 0. Current production deployment (2026-07-14) — 🟢 LIVE
+
+- **URL:** https://0718-lome-dcs-construction.vercel.app  ·  **Vercel project:** `raj-pulagala-s-projects/0718-lome-dcs-construction`
+- **Database:** **Neon Postgres** added via the Vercel Marketplace (Storage tab). It injects `DATABASE_URL` (pooled) + `DATABASE_URL_UNPOOLED` (direct) + `POSTGRES_*`. These are **sensitive** — `vercel env pull` returns them blank, so migrations and seeding run **inside the Vercel build**, not locally.
+- **Photos:** a **public Vercel Blob** store (`dcs-photos`) is linked; `BLOB_MODE=vercel` and `BLOB_READ_WRITE_TOKEN` are set. Uploaded photos serve directly from Blob URLs.
+- **Build command** (`vercel.json`): `prisma migrate deploy && tsx scripts/createAdmin.ts && next build`. Migrations use `DATABASE_URL_UNPOOLED` (pooled/PgBouncer breaks Prisma Migrate's advisory locks — see `prisma.config.ts`).
+- **First admin:** `scripts/createAdmin.ts` (idempotent) creates a `PRINCIPAL_ADMIN` from `INITIAL_ADMIN_NAME` / `INITIAL_ADMIN_EMAIL` / `INITIAL_ADMIN_PASSWORD` env vars, then those were removed. Production admin: **`rpulagala@gmail.com`**.
+- **Env vars set in Vercel:** `AUTH_SECRET`, `AUTH_TRUST_HOST=true`, `APP_BASE_URL`, `NEXTAUTH_URL`, `BLOB_MODE=vercel`, plus the Neon + Blob integration vars.
+- **Seeding production:** set `SEED_ON_BUILD=1` and add a guarded step to the build (`sh -c 'if [ "$SEED_ON_BUILD" = "1" ]; then DATABASE_URL="$DATABASE_URL_UNPOOLED" tsx prisma/seed.ts; fi'`), deploy, then **remove both** so a normal deploy can never wipe prod. The seed upserts demo users and rebuilds transactional data; it does **not** delete the real admin.
+- **Backlog (not yet wired):** real email (Resend key + verified domain — also unblocks staff password resets), custom domain, self-service password change, deactivating the demo `@dcs.example` accounts, private-blob signed URLs.
+
+> ⚠️ Production currently contains demo staff accounts (`@dcs.example`, password `Password123!`) from the seed — deactivate them via **Admin → Users** before real-world use.
+
 ## 1. Prerequisites
 - Node.js 20+ and npm.
 - A PostgreSQL 15+ database (Neon, Supabase, RDS, or self-hosted).

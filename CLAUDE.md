@@ -1,5 +1,7 @@
 @AGENTS.md
 
+> **Status:** the phased build (Phases 0–7) is complete and the app is **live in production** on Vercel — https://0718-lome-dcs-construction.vercel.app. Full context/status is in [AGENTS.md](AGENTS.md) (imported above) and [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md). Work now is incremental polish/ops on the shipped product rather than net-new phases; the phase-completion protocol below still applies whenever a substantial chunk of work lands.
+
 # Working agreement
 
 **Phase-by-phase, with an intentional context purge between phases.** After a phase is

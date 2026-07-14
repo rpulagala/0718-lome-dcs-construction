@@ -1,5 +1,7 @@
 # DCS Construction — User Guide
 
+**Live site:** https://0718-lome-dcs-construction.vercel.app — customers use the public pages; staff sign in at `/signin`.
+
 Two audiences: **customers** (public, no account) and **staff** (Employee / Manager / Principal Administrator).
 
 ---
