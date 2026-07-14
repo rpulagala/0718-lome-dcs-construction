@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { sectionTone } from "@/lib/ui/tone";
 import {
   createProjectAction,
   updateProjectAction,
@@ -83,7 +84,7 @@ export function ProjectPanel({ requestId, project, acceptedEstimates, managers, 
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4" data-testid="project-panel">
+    <section className={`rounded-lg border p-4 ${sectionTone.blue}`} data-testid="project-panel">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-900">Project</h2>
         {project && (

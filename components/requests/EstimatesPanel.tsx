@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { sectionTone } from "@/lib/ui/tone";
 import {
   createEstimateAction,
   updateEstimateAction,
@@ -126,7 +127,7 @@ export function EstimatesPanel({ requestId, estimates, canManage }: Props) {
 
   return (
     <section
-      className="rounded-lg border border-slate-200 bg-white p-4"
+      className={`rounded-lg border p-4 ${sectionTone.gray}`}
       data-testid="estimates-panel"
     >
       <div className="mb-2 flex items-center justify-between">

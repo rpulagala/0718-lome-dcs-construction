@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { sectionTone } from "@/lib/ui/tone";
 import { createTaskAction, toggleTaskAction } from "@/app/requests/[id]/actions";
 
 export interface TaskItem {
@@ -51,7 +52,7 @@ export function TaskList({ requestId, tasks, users }: Props) {
   const input = "h-9 rounded-md border border-slate-300 px-2 text-sm";
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div className={`rounded-lg border p-4 ${sectionTone.green}`}>
       <h3 className="text-sm font-semibold text-slate-900">Follow-up tasks</h3>
 
       {tasks.length === 0 ? (

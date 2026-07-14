@@ -22,6 +22,7 @@ import { allowedProjectTransitions } from "@/lib/domain/projectStatus";
 import { toCustomerStatus, internalStatusLabel } from "@/lib/domain/status";
 import { isOverdue } from "@/lib/domain/businessHours";
 import { formatInCompanyTz, formatMoney } from "@/lib/utils";
+import { sectionTone, type SectionTone } from "@/lib/ui/tone";
 
 /** A stored UTC-midnight date rendered as a YYYY-MM-DD value for date inputs. */
 function toDateInput(d: Date | null | undefined): string {
@@ -42,9 +43,17 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({
+  title,
+  tone = "gray",
+  children,
+}: {
+  title: string;
+  tone?: SectionTone;
+  children: React.ReactNode;
+}) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4">
+    <section className={`rounded-lg border p-4 ${sectionTone[tone]}`}>
       <h2 className="mb-2 text-sm font-semibold text-slate-900">{title}</h2>
       {children}
     </section>
@@ -168,7 +177,7 @@ export default async function RequestDetailPage({
           {/* Main column */}
           <div className="space-y-6 lg:col-span-2">
             <div className="grid gap-6 sm:grid-cols-2">
-              <Card title="Customer">
+              <Card title="Customer" tone="blue">
                 <dl>
                   <Row label="Name" value={r.customer.fullName} />
                   <Row label="Phone" value={r.customer.phone} />
@@ -176,7 +185,7 @@ export default async function RequestDetailPage({
                   <Row label="Preferred" value={r.preferredContact} />
                 </dl>
               </Card>
-              <Card title="Location">
+              <Card title="Location" tone="green">
                 <dl>
                   <Row label="Street" value={`${r.address.street}${r.address.unit ? `, ${r.address.unit}` : ""}`} />
                   <Row label="City" value={`${r.address.city}, ${r.address.state} ${r.address.zip}`} />
@@ -197,7 +206,7 @@ export default async function RequestDetailPage({
               </Card>
             </div>
 
-            <Card title="Project">
+            <Card title="Project" tone="gray">
               <dl>
                 <Row label="Category" value={r.categoryNameSnapshot} />
                 <Row label="Budget" value={r.budgetRange || "—"} />
@@ -211,12 +220,12 @@ export default async function RequestDetailPage({
               </p>
             </Card>
 
-            <Card title={`Photos (${r.photos.length})`}>
+            <Card title={`Photos (${r.photos.length})`} tone="orange">
               <InternalGallery photos={r.photos.map((p) => ({ id: p.id, storageKey: p.storageKey, fileName: p.fileName }))} />
             </Card>
 
             {/* Notes — one card: add a note + internal + customer-visible */}
-            <section className="rounded-lg border border-slate-200 bg-white">
+            <section className={`rounded-lg border ${sectionTone.blue}`}>
               <div className="p-4">
                 <NoteForm requestId={r.id} />
               </div>
@@ -255,7 +264,7 @@ export default async function RequestDetailPage({
             <TaskList requestId={r.id} tasks={tasks} users={users} />
 
             {/* Communication — one card: log form + communication log */}
-            <section className="rounded-lg border border-slate-200 bg-white">
+            <section className={`rounded-lg border ${sectionTone.orange}`}>
               <div className="p-4">
                 <CommunicationForm requestId={r.id} />
               </div>
@@ -291,7 +300,7 @@ export default async function RequestDetailPage({
               canManage={canProject}
             />
 
-            <Card title="Activity timeline">
+            <Card title="Activity timeline" tone="green">
               <ol className="space-y-2" data-testid="timeline">
                 {r.activities.map((a) => (
                   <li key={a.id} className="flex justify-between gap-4 text-sm">
@@ -327,7 +336,7 @@ export default async function RequestDetailPage({
               defaultAssigneeId={r.assignedTo?.id ?? null}
             />
 
-            <Card title="At a glance">
+            <Card title="At a glance" tone="green">
               <dl>
                 <Row label="Assigned to" value={r.assignedTo?.name ?? "Unassigned"} />
                 <Row label="First contacted" value={fmt(r.firstContactedAt)} />
@@ -336,7 +345,7 @@ export default async function RequestDetailPage({
               </dl>
             </Card>
 
-            <Card title="Status history">
+            <Card title="Status history" tone="gray">
               <ul className="space-y-2 text-sm">
                 {r.statusHistory.map((s) => (
                   <li key={s.id} className="flex justify-between gap-3">
@@ -352,7 +361,7 @@ export default async function RequestDetailPage({
             </Card>
 
             {r.assignmentHistory.length > 0 && (
-              <Card title="Assignment history">
+              <Card title="Assignment history" tone="orange">
                 <ul className="space-y-2 text-sm">
                   {r.assignmentHistory.map((a) => (
                     <li key={a.id} className="flex justify-between gap-3">

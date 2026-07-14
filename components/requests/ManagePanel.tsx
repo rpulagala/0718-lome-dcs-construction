@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { sectionTone } from "@/lib/ui/tone";
 import type { RequestStatus, Priority } from "@/lib/generated/prisma/enums";
 import { changeStatusAction, assignAction, priorityAction } from "@/app/requests/[id]/actions";
 
@@ -40,7 +41,7 @@ export function ManagePanel(props: Props) {
   }
 
   return (
-    <div className="space-y-5 rounded-lg border border-slate-200 bg-white p-4">
+    <div className={`space-y-5 rounded-lg border p-4 ${sectionTone.orange}`}>
       <h3 className="text-sm font-semibold text-slate-900">Manage</h3>
 
       {msg && (

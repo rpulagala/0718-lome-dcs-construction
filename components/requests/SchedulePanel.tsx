@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { sectionTone } from "@/lib/ui/tone";
 import {
   scheduleVisitAction,
   rescheduleVisitAction,
@@ -127,7 +128,7 @@ export function SchedulePanel({ requestId, visits, users, defaultAssigneeId }: P
   const input = "h-9 w-full rounded-md border border-slate-300 px-2 text-sm";
 
   return (
-    <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4" data-testid="schedule-panel">
+    <div className={`space-y-4 rounded-lg border p-4 ${sectionTone.blue}`} data-testid="schedule-panel">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-900">Site visits</h3>
         {!showForm && (
