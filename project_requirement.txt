@@ -1,0 +1,1172 @@
+# Claude Code Prompt: Build a Construction Work Intake and Tracking Web Application
+
+You are a senior full-stack engineer, product architect, UX designer, database architect, security engineer, and QA automation engineer.
+
+Your task is to design and build a production-ready MVP for a construction company called **DCS Construction**.
+
+The application will allow prospective customers to submit construction work requests and allow DCS employees and administrators to review, assign, schedule, track, and manage those requests through completion.
+
+Use the attached reference document as the original business and workflow specification:
+
+`DCS Construction Site Map 3 (1).pdf`
+
+Read all pages of the PDF before designing or coding. Use the document as a source of requirements, but improve the workflows and user experience where appropriate. Do not blindly reproduce the old mobile mockups. Build a modern, responsive web application that works well on phones, tablets, and desktop browsers.
+
+## 1. Primary Product Goal
+
+Build a construction project intake and tracking application with three main user groups:
+
+1. Public customer or prospective customer
+2. DCS employee
+3. DCS principal administrator
+
+The MVP must support the complete lifecycle:
+
+```text
+Customer submits request
+→ Confirmation is sent
+→ Request appears in employee dashboard
+→ Employee reviews and qualifies request
+→ Site visit is scheduled
+→ Request is assigned
+→ Estimate and project information are tracked
+→ Status is updated
+→ Customer receives appropriate notifications
+→ Request is completed, cancelled, or archived
+```
+
+The application should initially serve one construction company, DCS Construction. Structure the code and database cleanly enough that multi-company support could be added later, but do not build multi-tenancy in the MVP unless it is needed for sound architecture.
+
+---
+
+# 2. Technology Stack
+
+Use the following preferred stack unless the existing repository already has an established compatible stack:
+
+* Next.js with App Router
+* TypeScript with strict mode
+* React
+* Tailwind CSS
+* shadcn/ui
+* PostgreSQL
+* Prisma ORM
+* Auth.js, Clerk, or another secure authentication system
+* Vercel-compatible deployment
+* S3-compatible object storage, Cloudflare R2, Vercel Blob, or Supabase Storage for uploaded images
+* Resend, SendGrid, Postmark, or another transactional email provider
+* Zod for validation
+* React Hook Form for forms
+* Playwright for end-to-end testing
+* Vitest or Jest for unit and integration testing
+
+Prefer server actions or secure API routes where appropriate.
+
+Do not store uploaded images directly in the database. Store image metadata and secure object-storage URLs in the database.
+
+Use environment variables for all secrets.
+
+---
+
+# 3. Start With Discovery
+
+Before writing implementation code:
+
+1. Inspect the current repository.
+2. Read all existing documentation.
+3. Read the attached PDF completely.
+4. Identify whether this is:
+
+   * a new project,
+   * an extension of an existing application, or
+   * a replacement for an existing prototype.
+5. Document assumptions and unanswered questions.
+6. Create a phased implementation plan.
+7. Create or update:
+
+   * `README.md`
+   * `docs/PRODUCT_REQUIREMENTS.md`
+   * `docs/ARCHITECTURE.md`
+   * `docs/DATA_MODEL.md`
+   * `docs/SECURITY.md`
+   * `docs/TEST_PLAN.md`
+   * `docs/DECISIONS.md`
+   * `docs/IMPLEMENTATION_PLAN.md`
+
+Do not begin broad implementation until the architecture and database model have been documented.
+
+Do not stop merely because some business details are missing. Make reasonable MVP assumptions, record them in `docs/DECISIONS.md`, and continue.
+
+---
+
+# 4. Public Customer Experience
+
+## 4.1 Public Home Page
+
+Build a professional construction-company landing page.
+
+Include:
+
+* DCS Construction branding
+* Hero section
+* Construction services summary
+* Residential work
+* Commercial work
+* Completed-project galleries
+* Clear “Request a Site Visit” call to action
+* Phone and email contact information
+* Service area
+* Testimonials placeholder
+* Footer with privacy policy and terms
+
+The reference document shows a broader navigation containing Construction, Handyman, and Consultation Services. For this MVP, prioritize Construction while designing the navigation so the other service areas can be added later.
+
+## 4.2 Services Page
+
+Create a Construction Services page with:
+
+* Brief service description
+* Residential gallery
+* Commercial gallery
+* Project categories
+* “Schedule a Site Visit” or “Request an Estimate” button
+* Responsive photo gallery
+* Individual project details or modal views
+* Accessible image alt text
+
+Gallery content may initially use seeded placeholder projects and images.
+
+## 4.3 Work Request Form
+
+Create a mobile-friendly customer intake form.
+
+Required fields:
+
+* Full name
+* Phone number
+* Email address
+* Street address
+* City
+* State
+* ZIP code
+* Project category
+* Project description
+* Preferred contact method
+* Permission to contact the customer
+* Privacy and submission consent
+
+Optional fields:
+
+* Unit or suite
+* Preferred site-visit dates
+* Estimated budget range
+* Desired start timeframe
+* Referral source
+* Additional notes
+
+Photo upload requirements:
+
+* Allow multiple photos
+* Support drag-and-drop and mobile camera uploads
+* Display upload progress
+* Show thumbnails
+* Allow removal before submission
+* Validate file type and size
+* Reject executable or unsupported files
+* Sanitize filenames
+* Limit the number of images
+* Compress or optimize images where practical
+* Store original metadata
+* Prevent unauthorized public access if private storage is used
+
+Suggested project categories from the source document:
+
+* Home Remodel
+* Kitchen Remodel
+* Bathroom Remodel
+* Interior Construction
+* Interior Painting
+* Exterior Painting
+* Deck Construction
+* Construction Consulting
+* Interior Repairs
+* Exterior Repairs
+* Electrical Upgrades
+* Plumbing Upgrades
+* Minor Repairs / Handyman
+* Other
+
+These categories must be database-driven and manageable by a principal administrator rather than hardcoded throughout the application.
+
+## 4.4 Submission Processing
+
+When the customer submits a request:
+
+1. Validate the form on both client and server.
+2. Use a database transaction where appropriate.
+3. Create a unique, human-readable request number, such as:
+
+```text
+DCS-2026-000123
+```
+
+4. Save the request and image records.
+5. Add an initial status-history record.
+6. Record a timeline activity for the submission.
+7. Send a confirmation email to the customer.
+8. Notify designated DCS employees or a shared intake mailbox.
+9. Show a confirmation page.
+
+Confirmation page message:
+
+> Thank you for your interest in DCS Construction. Your request has been received. Our team will review it and contact you within 48 business hours.
+
+Display:
+
+* Request number
+* Submission date
+* Summary of submitted information
+* Expected response time
+* DCS contact information
+
+Prevent accidental duplicate submissions caused by double-clicking or browser retries. Use an idempotency mechanism.
+
+## 4.5 Customer Confirmation Email
+
+Send a professional email that includes:
+
+* Customer name
+* Request number
+* Project category
+* Address or service location
+* Project summary
+* Expected response time
+* DCS contact information
+* Link to a customer request-status page, if that feature is included
+
+Do not send private internal notes in customer emails.
+
+Marketing information may be included only in a restrained, professional section and must not distract from the confirmation.
+
+---
+
+# 5. Customer Request Status
+
+Create a secure way for customers to review the status of their request without needing a full account in the MVP.
+
+Possible implementation:
+
+* Signed, expiring magic link
+* One-time access token
+* Request number plus email verification
+
+The customer view may include:
+
+* Request number
+* Project category
+* Submission date
+* Current customer-visible status
+* Scheduled site-visit details
+* DCS contact information
+* Public timeline updates
+* Ability to upload additional requested photos
+* Ability to add a message
+
+Do not expose:
+
+* Internal employee notes
+* Internal cost calculations
+* Private estimates before approval
+* Other customers’ information
+* Employee-only attachments
+
+---
+
+# 6. Authentication and Roles
+
+Implement secure employee authentication.
+
+Roles:
+
+## Employee
+
+Can:
+
+* View authorized work requests
+* Open request details
+* Add internal notes
+* Update operational status
+* Schedule site visits
+* Assign or reassign requests if permitted
+* Upload internal files and photos
+* Record customer communication
+* Mark tasks complete
+
+## Manager
+
+Can do everything an employee can, plus:
+
+* View all active requests
+* Assign requests to employees
+* Manage schedules
+* Review estimates
+* View operational reports
+* Reopen or archive requests
+
+## Principal Administrator
+
+Can do everything a manager can, plus:
+
+* Manage users
+* Activate and deactivate employees
+* Change user roles
+* Manage project categories
+* Manage statuses and notification settings
+* Manage company profile
+* View audit logs
+* Configure email recipients
+* View all requests and reporting
+* Archive records
+* Export data
+
+Use authorization checks on the server. Hiding a button in the UI is not sufficient security.
+
+---
+
+# 7. Employee Dashboard
+
+Create an employee dashboard inspired by the admin screens in the reference document, but use modern UI patterns.
+
+## 7.1 Dashboard Summary
+
+Display summary cards such as:
+
+* New requests
+* Awaiting first contact
+* Site visits to schedule
+* Site visits today
+* Estimates pending
+* Active projects
+* Requests overdue for response
+* Completed this month
+
+## 7.2 Work Request Table
+
+Display requests with the most recent or highest-priority items first.
+
+Columns:
+
+* Request number
+* Customer name
+* Submission date
+* Contact
+* Project category
+* City or ZIP code
+* Status
+* Priority
+* Assigned employee
+* Site-visit date
+* Last activity
+* Photo indicator
+* Actions
+
+Support:
+
+* Sorting
+* Filtering
+* Search
+* Pagination
+* Saved views where practical
+* Mobile card layout
+* Empty states
+* Loading states
+* Error states
+
+Filters:
+
+* Status
+* Project category
+* Assigned employee
+* Date submitted
+* Site-visit date
+* Priority
+* City or ZIP code
+* Requests with photos
+* Unassigned requests
+* Overdue requests
+
+Search across:
+
+* Request number
+* Customer name
+* Email
+* Phone
+* Street address
+* Project description
+
+Default view should make newly submitted and overdue requests easy to identify.
+
+---
+
+# 8. Request Detail Screen
+
+Clicking a table row should open a dedicated request detail page, not an unmanaged browser popup.
+
+Display:
+
+## Customer Information
+
+* Name
+* Phone
+* Email
+* Preferred contact method
+
+## Project Location
+
+* Full address
+* Optional map link
+* Service-area indication
+
+## Project Information
+
+* Request number
+* Category
+* Description
+* Budget range
+* Requested timeframe
+* Referral source
+* Submission date
+* Current status
+* Priority
+* Assigned employee
+
+## Photo Gallery
+
+* Thumbnail gallery
+* Full-screen or modal image viewer
+* Previous and next navigation
+* Zoom
+* Download permission for authorized users
+* Image metadata
+* Accessible controls
+
+The reference document specifically requires clicking a photo to open a larger view. Preserve that requirement using an accessible modal or lightbox.
+
+## Internal Management
+
+* Internal notes
+* Customer-visible notes
+* Activity timeline
+* Status history
+* Assignment history
+* Site-visit records
+* Tasks
+* Attachments
+* Communication log
+* Estimate summary
+* Audit information
+
+---
+
+# 9. Request Status Workflow
+
+Use a clear status model.
+
+Suggested statuses:
+
+```text
+NEW
+REVIEWING
+NEEDS_MORE_INFORMATION
+CONTACTED
+SITE_VISIT_TO_SCHEDULE
+SITE_VISIT_SCHEDULED
+SITE_VISIT_COMPLETED
+ESTIMATE_IN_PROGRESS
+ESTIMATE_SENT
+CUSTOMER_DECISION_PENDING
+APPROVED
+PROJECT_SCHEDULED
+IN_PROGRESS
+ON_HOLD
+COMPLETED
+DECLINED
+CANCELLED
+ARCHIVED
+```
+
+Also create a simpler customer-facing status mapping, for example:
+
+```text
+Request Received
+Under Review
+Site Visit Scheduled
+Estimate Being Prepared
+Estimate Sent
+Project Scheduled
+Work in Progress
+Completed
+Closed
+```
+
+Requirements:
+
+* Record every status change.
+* Store who made the change.
+* Store the timestamp.
+* Allow an optional reason or note.
+* Prevent invalid transitions where appropriate.
+* Trigger selected notifications from meaningful status changes.
+* Do not expose every internal status to customers.
+
+---
+
+# 10. Assignment and Follow-Up
+
+Employees and managers must be able to:
+
+* Assign a request to an employee
+* Reassign it
+* Set priority
+* Add follow-up date
+* Add due date
+* Create tasks
+* Mark tasks complete
+* Record contact attempts
+* Add next-action notes
+* Identify overdue requests
+
+Suggested priority values:
+
+* Low
+* Normal
+* High
+* Urgent
+
+Create a service-level indicator for new requests that have not been contacted within the company’s target response period, initially 48 business hours.
+
+---
+
+# 11. Site-Visit Scheduling
+
+Support site-visit scheduling within a work request.
+
+Fields:
+
+* Site-visit date
+* Start time
+* End time
+* Assigned employee
+* Address
+* Internal instructions
+* Customer instructions
+* Appointment status
+* Cancellation reason
+* Reschedule history
+
+Appointment statuses:
+
+* Proposed
+* Confirmed
+* Completed
+* Rescheduled
+* Cancelled
+* No-show
+
+When a visit is scheduled or changed:
+
+* Add it to the request timeline.
+* Send the customer a notification.
+* Notify the assigned employee.
+* Store all changes.
+* Prevent accidental double-booking where practical.
+
+For the MVP, an internal calendar view is sufficient. Design an integration boundary for Google Calendar or Microsoft Outlook but do not make external calendar integration block the core build.
+
+---
+
+# 12. Estimates and Project Tracking
+
+The original document focuses mainly on intake, but extend the MVP enough to track a request after the site visit.
+
+Create an estimate section containing:
+
+* Estimate number
+* Request reference
+* Estimate status
+* Description
+* Estimated amount
+* Created date
+* Sent date
+* Expiration date
+* Internal notes
+* Customer notes
+* File attachment or generated PDF placeholder
+
+Estimate statuses:
+
+* Draft
+* Under Review
+* Sent
+* Accepted
+* Declined
+* Expired
+* Revised
+
+For the initial MVP, do not build a full accounting or invoicing platform. Store estimate summary information and support attachment of an externally generated estimate.
+
+Once approved, allow creation of a project record containing:
+
+* Project name
+* Customer
+* Location
+* Assigned project manager
+* Planned start date
+* Planned completion date
+* Actual start date
+* Actual completion date
+* Project status
+* Contract amount
+* Internal notes
+* Milestones
+* Progress updates
+
+---
+
+# 13. Principal Administrator Area
+
+The principal admin screen in the source document presents all requests and project categories. Expand this into an administration area.
+
+## User Management
+
+* Invite employee
+* Edit employee profile
+* Assign role
+* Activate or deactivate employee
+* Reset or resend invitation
+* View recent account activity
+
+## Project Category Management
+
+* Add category
+* Rename category
+* Add description
+* Reorder categories
+* Activate or deactivate category
+* Prevent deletion when referenced by existing requests
+* Preserve historical category values
+
+## Company Settings
+
+* Company name
+* Logo
+* Phone
+* Email
+* Address
+* Service area
+* Standard response-time message
+* Intake notification recipients
+* Customer email templates
+* Image-upload limits
+
+## Workflow Settings
+
+Initially, these may be configuration records rather than a complex workflow builder:
+
+* Default request status
+* Default priority
+* Response target
+* Notification rules
+* Assignment defaults
+
+## Audit Log
+
+Record important administrative and operational events:
+
+* User login
+* User creation and role changes
+* Request assignment
+* Status changes
+* Customer-data edits
+* File access or deletion
+* Settings changes
+* Exports
+* Archive and restore actions
+
+---
+
+# 14. Suggested Database Model
+
+Design a normalized relational schema.
+
+Likely entities:
+
+```text
+User
+Role
+Customer
+Address
+WorkRequest
+ProjectCategory
+WorkRequestPhoto
+WorkRequestAttachment
+WorkRequestStatusHistory
+WorkRequestAssignmentHistory
+WorkRequestNote
+WorkRequestActivity
+Task
+SiteVisit
+SiteVisitHistory
+Communication
+Estimate
+Project
+ProjectMilestone
+Notification
+EmailLog
+CustomerAccessToken
+CompanySetting
+AuditLog
+```
+
+Important modeling requirements:
+
+* Use UUIDs or secure non-sequential internal IDs.
+* Use a separate human-readable request number.
+* Include `createdAt` and `updatedAt`.
+* Use soft deletion or archival for important business records.
+* Preserve historical assignments and statuses.
+* Create appropriate indexes.
+* Avoid putting all information into large JSON columns.
+* JSON may be used for non-critical metadata but not as a substitute for a proper schema.
+* Store timestamps consistently in UTC.
+* Display dates in the configured company timezone.
+* Avoid permanently deleting customer submissions through normal UI actions.
+
+Create a Prisma schema and include an entity-relationship diagram in Mermaid syntax in `docs/DATA_MODEL.md`.
+
+---
+
+# 15. Notifications and Email Logging
+
+Create transactional email templates for:
+
+* Customer submission confirmation
+* Internal new-request alert
+* Request requires more information
+* Site visit proposed
+* Site visit confirmed
+* Site visit changed
+* Site visit cancelled
+* Estimate sent
+* Project scheduled
+* Project status update
+* Request closed
+
+For each outbound email, store:
+
+* Recipient
+* Template
+* Related request
+* Send status
+* Provider message ID
+* Timestamp
+* Error information
+* Retry count where appropriate
+
+Do not fail the customer submission entirely if email delivery fails after the database record was safely created. Show a successful submission, log the email failure, and alert administrators.
+
+Build email delivery behind a service abstraction so providers can be replaced.
+
+In local development, support an email preview or logging mode.
+
+---
+
+# 16. Security and Privacy
+
+Implement:
+
+* Server-side role-based authorization
+* Secure password and session handling
+* Input validation
+* Output encoding
+* CSRF protection where applicable
+* Rate limiting on public forms
+* Bot protection or CAPTCHA abstraction
+* Secure upload validation
+* File-size limits
+* MIME-type verification
+* Randomized storage keys
+* Signed URLs for private files
+* Protection against insecure direct-object references
+* Protection against SQL injection
+* Protection against XSS
+* Security headers
+* Safe error messages
+* Secret management through environment variables
+* Audit logs
+* Least-privilege database access
+* Data-retention documentation
+
+Never log:
+
+* Authentication secrets
+* Access tokens
+* Full session cookies
+* Uploaded-file contents
+* Sensitive customer data unnecessarily
+
+Do not expose customer addresses, phone numbers, or emails through public URLs or client-side data not required by the current user.
+
+---
+
+# 17. Accessibility and Responsive Design
+
+Meet WCAG 2.1 AA expectations where practical.
+
+Include:
+
+* Proper form labels
+* Keyboard navigation
+* Visible focus states
+* Semantic HTML
+* Accessible modals
+* Alt text
+* Sufficient contrast
+* Error summaries
+* Screen-reader-friendly validation
+* Touch-friendly mobile controls
+* Responsive tables or card layouts
+
+Test at minimum:
+
+* 375px mobile
+* 768px tablet
+* 1440px desktop
+
+The application should feel like a modern responsive web app rather than a desktop table squeezed onto a phone.
+
+---
+
+# 18. Seed Data
+
+Create realistic seed data with:
+
+* One principal administrator
+* Two managers
+* Four employees
+* At least 25 customer requests
+* Multiple statuses
+* All project categories
+* Requests with and without photos
+* Scheduled and completed site visits
+* Overdue requests
+* Unassigned requests
+* Estimates in different stages
+* Two active construction projects
+
+Do not use real personal information.
+
+Document development credentials in a secure local-only seed process. Do not commit production passwords.
+
+---
+
+# 19. Testing Requirements
+
+## Unit Tests
+
+Test:
+
+* Validation schemas
+* Request-number generation
+* Status-transition rules
+* Authorization helpers
+* Notification decisions
+* Customer-visible status mapping
+* File-validation rules
+
+## Integration Tests
+
+Test:
+
+* Work-request creation
+* Database transaction behavior
+* Image metadata creation
+* Assignment
+* Status history
+* Site-visit scheduling
+* Email logging
+* Category management
+* Role permissions
+
+## Playwright End-to-End Tests
+
+Create Playwright tests for these critical journeys:
+
+### Customer Intake
+
+1. Open home page.
+2. Navigate to Construction Services.
+3. Open Request a Site Visit.
+4. Complete the form.
+5. Upload multiple photos.
+6. Submit.
+7. Confirm success screen and request number.
+8. Verify the request exists in the database or admin UI.
+
+### Employee Processing
+
+1. Sign in as an employee.
+2. Open the newest request.
+3. View customer details.
+4. Open an uploaded photo in the enlarged viewer.
+5. Add an internal note.
+6. Update the status.
+7. Schedule a site visit.
+8. Confirm timeline entries.
+
+### Manager Assignment
+
+1. Sign in as manager.
+2. Find an unassigned request.
+3. Assign it to an employee.
+4. Set priority.
+5. Confirm assignment history.
+
+### Principal Administrator
+
+1. Sign in as principal administrator.
+2. Add a project category.
+3. Edit a project category.
+4. Deactivate the category.
+5. Invite or create an employee.
+6. Change an employee’s role.
+7. View the audit log.
+
+### Authorization
+
+Verify:
+
+* Employees cannot access principal-admin pages.
+* Customers cannot access internal request data.
+* Deactivated users cannot sign in.
+* One employee cannot perform restricted manager actions.
+* Direct URL manipulation does not bypass authorization.
+
+Use stable test selectors and avoid tests that depend entirely on visible text.
+
+---
+
+# 20. Observability and Reliability
+
+Implement:
+
+* Structured server logging
+* Error tracking abstraction
+* Health-check endpoint
+* Database connectivity check
+* Email failure logging
+* Upload failure logging
+* Request correlation IDs
+* Basic application metrics where practical
+
+Use graceful error handling.
+
+Provide useful user-facing messages without exposing stack traces or system details.
+
+---
+
+# 21. Development Workflow
+
+Work in phases.
+
+## Phase 1: Planning and Foundation
+
+* Analyze PDF
+* Inspect repository
+* Create documentation
+* Establish architecture
+* Create project shell
+* Set up database
+* Set up authentication
+* Define roles and permissions
+
+## Phase 2: Public Intake
+
+* Public pages
+* Services and galleries
+* Work-request form
+* Image uploads
+* Confirmation page
+* Customer confirmation email
+
+## Phase 3: Internal Request Management
+
+* Employee dashboard
+* Filters and search
+* Request detail page
+* Image viewer
+* Notes
+* Statuses
+* Assignments
+* Timeline
+
+## Phase 4: Scheduling and Communication
+
+* Site visits
+* Internal calendar
+* Customer notifications
+* Communication log
+* Follow-up tasks
+
+## Phase 5: Admin and Configuration
+
+* User management
+* Project-category management
+* Company settings
+* Audit logs
+* Email configuration
+
+## Phase 6: Estimates and Projects
+
+* Estimate tracking
+* Estimate attachments
+* Project conversion
+* Basic project milestones
+
+## Phase 7: Testing and Hardening
+
+* Unit tests
+* Integration tests
+* Playwright
+* Accessibility
+* Security review
+* Performance checks
+* Deployment documentation
+
+After every phase:
+
+1. Run linting.
+2. Run type checking.
+3. Run relevant tests.
+4. Fix failures.
+5. Update documentation.
+6. Commit changes with a clear commit message, when repository access permits.
+
+Do not leave the repository in a broken state between phases.
+
+---
+
+# 22. UX Expectations
+
+Use a professional construction-industry visual style:
+
+* Clean
+* Trustworthy
+* Practical
+* Modern
+* Easy to scan
+* Mobile-friendly
+* Not overly decorative
+
+Use status badges consistently.
+
+Examples:
+
+* New
+* Contacted
+* Site Visit Scheduled
+* Estimate Sent
+* Approved
+* In Progress
+* Completed
+* On Hold
+
+Provide confirmation prompts for destructive or consequential actions.
+
+Use toasts for lightweight success messages, but do not rely on toasts as the only indication of major actions.
+
+Use dialogs, sheets, and side panels carefully. Core request details should remain directly linkable through a stable URL.
+
+---
+
+# 23. MVP Boundaries
+
+Do not build the following unless the existing repository already contains them or they are required for the core flow:
+
+* Full accounting
+* Payroll
+* Inventory management
+* Complex construction scheduling
+* Subcontractor marketplace
+* Full CRM marketing automation
+* Automated pricing engine
+* Payment processing
+* Native iOS or Android apps
+* Real-time chat
+* Advanced document signing
+
+The MVP is a responsive web application. It may later be packaged as a Progressive Web App.
+
+Keep extension points for future features without overengineering them now.
+
+---
+
+# 24. Definition of Done
+
+The MVP is complete when:
+
+* A public customer can submit a construction request with photos.
+* The request is stored correctly.
+* The customer sees a confirmation and receives an email.
+* Internal users are notified.
+* Employees can see and search incoming requests.
+* Employees can open request details and enlarge uploaded images.
+* Authorized users can assign, prioritize, and update requests.
+* Employees can schedule and track site visits.
+* Managers can track work across employees.
+* Principal administrators can manage employees and project categories.
+* Every meaningful change appears in a timeline or audit history.
+* Authorization is enforced on the server.
+* Critical flows have automated tests.
+* The application is responsive and accessible.
+* Local setup and deployment steps are documented.
+* No known critical or high-severity security issues remain.
+* Linting, type checking, unit tests, and Playwright tests pass.
+
+---
+
+# 25. Final Deliverables
+
+At completion, provide:
+
+1. Working application
+2. Database migrations
+3. Seed script
+4. Environment variable template
+5. Architecture documentation
+6. Product requirements document
+7. Data-model documentation
+8. Security documentation
+9. Test plan
+10. Automated tests
+11. Deployment guide
+12. Admin and employee user guide
+13. Known limitations
+14. Recommended Phase 2 backlog
+15. Screenshots of major workflows
+16. Final validation report
+
+The final report must include:
+
+* Features completed
+* Features deferred
+* Assumptions made
+* Database tables created
+* Roles and permissions
+* Tests executed
+* Test results
+* Security controls implemented
+* Deployment readiness
+* Known risks
+* Recommended next steps
+
+Begin by reading the PDF and repository, then produce the implementation plan and proposed data model before making broad code changes.
