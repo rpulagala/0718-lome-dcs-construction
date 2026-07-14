@@ -1,4 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "prisma migrate deploy && tsx scripts/createAdmin.ts && next build"
+  "buildCommand": "prisma migrate deploy && tsx scripts/createAdmin.ts && sh -c 'if [ \"$SEED_ON_BUILD\" = \"1\" ]; then DATABASE_URL=\"$DATABASE_URL_UNPOOLED\" tsx prisma/seed.ts; fi' && next build"
 }

@@ -327,6 +327,206 @@ async function main() {
     });
   }
 
+  // ── Rich "showcase" requests: full lifecycle for demo/QA ──────────────────
+  // Two IN_PROGRESS projects that exercise every relation: multiple site visits
+  // (with history), assign + reassign, several photos, internal + customer notes,
+  // follow-up tasks, communication logs, three estimates (declined → revised →
+  // accepted), and a set of milestones.
+  const showcaseConfigs = [
+    {
+      seq: 27,
+      customer: ["Eleanor Whitfield", "eleanor.w@example.com", "415-555-0301", "742 Alameda Blvd", "San Francisco", "CA", "94107"],
+      categoryName: "Kitchen Remodel",
+      description: "Gut renovation of a 1920s kitchen: new cabinets, quartz counters, island, and full rewiring.",
+      projectName: "Whitfield Kitchen Gut Renovation",
+      contract: "48250.00",
+      createdDaysAgo: 45,
+      photoPrefix: "kitchen",
+    },
+    {
+      seq: 28,
+      customer: ["Beckman & Rowe LLP", "facilities@beckmanrowe.example", "415-555-0342", "1200 Market St, Suite 900", "San Francisco", "CA", "94102"],
+      categoryName: "Interior Construction",
+      description: "Commercial office buildout: demolition, framing, two conference rooms, HVAC coordination, and finishes.",
+      projectName: "Beckman & Rowe Office Buildout",
+      contract: "128900.00",
+      createdDaysAgo: 60,
+      photoPrefix: "office",
+    },
+  ];
+
+  let estSeq = 100; // showcase estimate numbers, clear of the seeded range
+  for (const [idx, sc] of showcaseConfigs.entries()) {
+    const d = (n: number) => daysAgo(sc.createdDaysAgo - n); // n days after intake
+    const category = categories.find((c) => c.name === sc.categoryName) ?? categories[0];
+    const pm = managers[idx % managers.length];
+    const empA = employees[idx % employees.length];
+    const empB = employees[(idx + 1) % employees.length];
+    const created = daysAgo(sc.createdDaysAgo);
+
+    const customer = await prisma.customer.create({
+      data: { fullName: sc.customer[0], email: sc.customer[1], phone: sc.customer[2], contactMethod: "EMAIL", createdAt: created },
+    });
+    const address = await prisma.address.create({
+      data: { street: sc.customer[3], city: sc.customer[4], state: sc.customer[5], zip: sc.customer[6], customerId: customer.id },
+    });
+
+    const wr = await prisma.workRequest.create({
+      data: {
+        requestNumber: formatRequestNumber(YEAR, sc.seq),
+        customerId: customer.id,
+        addressId: address.id,
+        categoryId: category.id,
+        categoryNameSnapshot: category.name,
+        description: sc.description,
+        budgetRange: "$40k–$150k",
+        desiredTimeframe: "Within 3 months",
+        referralSource: idx === 0 ? "Google search" : "Referral from a past client",
+        preferredContact: "EMAIL",
+        permissionToContact: true,
+        consentAccepted: true,
+        status: "IN_PROGRESS",
+        priority: "HIGH",
+        assignedToId: empB.id, // final assignee after reassignment
+        firstContactedAt: d(1),
+        responseDueAt: addBusinessHours(created, 48),
+        createdAt: created,
+        photos: {
+          create: [1, 2, 3, 4].map((n) => ({
+            storageKey: "seed/placeholder.png",
+            fileName: `${sc.photoPrefix}-${n}.png`,
+            contentType: "image/png",
+            sizeBytes: PLACEHOLDER_PNG.length,
+            width: 1,
+            height: 1,
+          })),
+        },
+        notes: {
+          create: [
+            { authorId: empA.id, body: "Initial walkthrough done. Existing wiring is undersized; we'll need a subpanel.", visibility: "INTERNAL", createdAt: d(3) },
+            { authorId: pm.id, body: "Customer is flexible on timeline but firm on the budget cap. Keep options tight.", visibility: "INTERNAL", createdAt: d(10) },
+            { authorId: empB.id, body: "Thanks for having us out! We'll send the revised estimate by Friday.", visibility: "CUSTOMER_VISIBLE", createdAt: d(12) },
+            { authorId: pm.id, body: "Materials are ordered; demolition begins next week as discussed.", visibility: "CUSTOMER_VISIBLE", createdAt: d(20) },
+          ],
+        },
+        tasks: {
+          create: [
+            { title: "Send revised estimate", createdById: pm.id, assigneeId: empB.id, isComplete: true, completedAt: d(12), dueAt: d(13), createdAt: d(15) },
+            { title: "Pull permits with the city", createdById: pm.id, assigneeId: empA.id, isComplete: true, completedAt: d(22), createdAt: d(25) },
+            { title: "Confirm appliance / materials delivery date", createdById: empB.id, assigneeId: empB.id, isComplete: false, dueAt: daysAgo(-5), createdAt: d(26) },
+            { title: "Schedule mid-project inspection", createdById: pm.id, assigneeId: empA.id, isComplete: false, dueAt: daysAgo(-12), createdAt: d(27) },
+          ],
+        },
+        communications: {
+          create: [
+            { loggedById: empA.id, channel: "PHONE", direction: "OUTBOUND", summary: "Called to schedule the initial site visit.", occurredAt: d(2) },
+            { loggedById: empA.id, channel: "EMAIL", direction: "INBOUND", summary: "Customer emailed photos of the existing space.", occurredAt: d(4) },
+            { loggedById: empB.id, channel: "EMAIL", direction: "OUTBOUND", summary: "Sent the first estimate for review.", occurredAt: d(14) },
+            { loggedById: empB.id, channel: "TEXT", direction: "INBOUND", summary: "Customer texted to accept the revised estimate.", occurredAt: d(21) },
+          ],
+        },
+        statusHistory: {
+          create: [
+            { toStatus: "NEW", createdAt: created },
+            { fromStatus: "NEW", toStatus: "REVIEWING", changedById: pm.id, createdAt: d(1) },
+            { fromStatus: "REVIEWING", toStatus: "CONTACTED", changedById: empA.id, createdAt: d(2) },
+            { fromStatus: "CONTACTED", toStatus: "SITE_VISIT_TO_SCHEDULE", changedById: empA.id, createdAt: d(3) },
+            { fromStatus: "SITE_VISIT_TO_SCHEDULE", toStatus: "SITE_VISIT_SCHEDULED", changedById: empA.id, createdAt: d(5) },
+            { fromStatus: "SITE_VISIT_SCHEDULED", toStatus: "SITE_VISIT_COMPLETED", changedById: empB.id, createdAt: d(8) },
+            { fromStatus: "SITE_VISIT_COMPLETED", toStatus: "ESTIMATE_IN_PROGRESS", changedById: pm.id, createdAt: d(10) },
+            { fromStatus: "ESTIMATE_IN_PROGRESS", toStatus: "ESTIMATE_SENT", changedById: empB.id, createdAt: d(14) },
+            { fromStatus: "ESTIMATE_SENT", toStatus: "APPROVED", reason: "Customer accepted the revised estimate", changedById: pm.id, createdAt: d(21) },
+            { fromStatus: "APPROVED", toStatus: "PROJECT_SCHEDULED", changedById: pm.id, createdAt: d(22) },
+            { fromStatus: "PROJECT_SCHEDULED", toStatus: "IN_PROGRESS", changedById: pm.id, createdAt: d(24) },
+          ],
+        },
+        assignmentHistory: {
+          create: [
+            { assignedToId: empA.id, assignedById: pm.id, createdAt: d(1) },
+            { assignedToId: empB.id, assignedById: pm.id, createdAt: d(16) },
+          ],
+        },
+        activities: {
+          create: [
+            { type: "SUBMITTED", summary: "Request submitted by customer", isCustomerVisible: true, createdAt: created },
+            { type: "ASSIGNED", summary: `Assigned to ${empA.name}`, createdAt: d(1) },
+            { type: "NOTE_ADDED", summary: "Internal note added", createdAt: d(3) },
+            { type: "SITE_VISIT_SCHEDULED", summary: "Site visit scheduled", isCustomerVisible: true, createdAt: d(5) },
+            { type: "SITE_VISIT_UPDATED", summary: "Site visit completed", createdAt: d(8) },
+            { type: "ASSIGNED", summary: `Reassigned to ${empB.name}`, createdAt: d(16) },
+            { type: "ESTIMATE_SENT", summary: "Estimate sent to customer", isCustomerVisible: true, createdAt: d(14) },
+            { type: "STATUS_CHANGED", summary: "Estimate accepted", createdAt: d(21) },
+            { type: "PROJECT_CREATED", summary: `Project "${sc.projectName}" created`, isCustomerVisible: true, createdAt: d(22) },
+          ],
+        },
+      },
+    });
+
+    // Two site visits with history: one completed (rescheduled once), one upcoming.
+    await prisma.siteVisit.create({
+      data: {
+        workRequestId: wr.id, addressId: address.id, assignedToId: empA.id,
+        scheduledDate: atHour(d(8), 10), startTime: atHour(d(8), 10), endTime: atHour(d(8), 11),
+        status: "COMPLETED", customerInstructions: "Gate code 4417; park in the driveway.",
+        history: {
+          create: [
+            { changeType: "created", newDate: atHour(d(6), 10) },
+            { changeType: "rescheduled", previousDate: atHour(d(6), 10), newDate: atHour(d(8), 10) },
+            { changeType: "completed", newDate: atHour(d(8), 10) },
+          ],
+        },
+      },
+    });
+    await prisma.siteVisit.create({
+      data: {
+        workRequestId: wr.id, addressId: address.id, assignedToId: empB.id,
+        scheduledDate: atHour(daysAgo(-3), 13), startTime: atHour(daysAgo(-3), 13), endTime: atHour(daysAgo(-3), 14),
+        status: "CONFIRMED", customerInstructions: "Progress check-in with the customer.",
+        history: { create: [{ changeType: "created", newDate: atHour(daysAgo(-3), 13) }] },
+      },
+    });
+
+    // Three estimates: declined → revised → accepted (the last one is picked).
+    await prisma.estimate.create({
+      data: { estimateNumber: formatEstimateNumber(YEAR, estSeq++), workRequestId: wr.id, status: "DECLINED", description: "Initial full-scope quote.", amount: (Number(sc.contract) * 1.18).toFixed(2), sentAt: d(14), createdById: pm.id, customerNotes: "First pass — customer felt it was over budget." },
+    });
+    await prisma.estimate.create({
+      data: { estimateNumber: formatEstimateNumber(YEAR, estSeq++), workRequestId: wr.id, status: "REVISED", description: "Value-engineered revision.", amount: (Number(sc.contract) * 1.05).toFixed(2), sentAt: d(18), createdById: pm.id, internalNotes: "Swapped a few finishes to hit the target." },
+    });
+    const acceptedEstimate = await prisma.estimate.create({
+      data: { estimateNumber: formatEstimateNumber(YEAR, estSeq++), workRequestId: wr.id, status: "ACCEPTED", description: "Final accepted scope and pricing.", amount: sc.contract, sentAt: d(20), createdById: pm.id },
+    });
+
+    // Project from the accepted estimate, with a milestone set (some complete).
+    await prisma.project.create({
+      data: {
+        name: sc.projectName, workRequestId: wr.id, estimateId: acceptedEstimate.id,
+        customerId: customer.id, addressId: address.id, projectManagerId: pm.id,
+        status: "IN_PROGRESS", contractAmount: sc.contract,
+        plannedStartDate: d(24), plannedEndDate: daysAgo(-40), actualStartDate: d(24),
+        internalNotes: "Kickoff complete; on schedule.",
+        milestones: {
+          create: [
+            { title: "Permits approved", sortOrder: 0, completedAt: d(22), dueAt: d(23) },
+            { title: "Demolition", sortOrder: 1, completedAt: d(24), dueAt: d(25) },
+            { title: "Rough-in (electrical / plumbing)", sortOrder: 2, completedAt: daysAgo(10), dueAt: daysAgo(8) },
+            { title: "Mid-project inspection", sortOrder: 3, dueAt: daysAgo(-6) },
+            { title: "Finishes & fixtures", sortOrder: 4, dueAt: daysAgo(-30) },
+            { title: "Final walkthrough", sortOrder: 5, dueAt: daysAgo(-40) },
+          ],
+        },
+      },
+    });
+  }
+
+  // Advance counters past the showcase allocations (requests 27–28, estimates 100+).
+  await prisma.requestCounter.upsert({
+    where: { year: YEAR }, update: { lastValue: 28 }, create: { year: YEAR, lastValue: 28 },
+  });
+  await prisma.estimateCounter.upsert({
+    where: { year: YEAR }, update: { lastValue: estSeq }, create: { year: YEAR, lastValue: estSeq },
+  });
+
   const counts = {
     settings: await prisma.companySetting.count(),
     categories: await prisma.projectCategory.count(),
