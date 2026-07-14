@@ -1,6 +1,6 @@
 # DCS Construction — Detailed Project Plan
 
-> **Build status — 2026-07-14:** Phases **0–5 complete and verified**; **Phase 6 (Estimates & Projects) is next**. 95 tests passing (unit + integration), typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (7 users, 14 categories, 5 settings, 26 work requests, photos, site visits, estimates, 2 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md).
+> **Build status — 2026-07-14:** Phases **0–7 complete and verified — feature-complete MVP**. **120 unit/integration tests + 10 Playwright E2E tests passing**, typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (7 users, 14 categories, 5 settings, 26 work requests, photos, site visits, estimates, 2 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md).
 >
 > | Phase | State |
 > |---|---|
@@ -10,8 +10,8 @@
 > | 3 — Internal request management | ✅ Complete & verified |
 > | 4 — Scheduling & communication | ✅ Complete & verified |
 > | 5 — Admin & configuration | ✅ Complete & verified |
-> | 6 — Estimates & projects | ⬜ Next |
-> | 7 — Testing & hardening | ⬜ Pending |
+> | 6 — Estimates & projects | ✅ Complete & verified |
+> | 7 — Testing & hardening | ✅ Complete & verified |
 
 > Work intake & tracking web application (production-ready MVP)
 > Source of truth: `project_requirement.txt` (the build prompt) + `DCS Construction Site Map 3 (1).pdf` (original 3-year-old rough concept)
@@ -188,20 +188,37 @@ Each phase ends with the **gate**: lint → typecheck → relevant tests → fix
 - Email template: `renderUserInvite`.
 - Tests: `tests/unit/adminValidation.test.ts` (schemas), `tests/integration/admin.test.ts` (invite/role/activate/last-admin guard/resend, category CRUD + reorder + referenced-delete block, settings validate/persist/audit). Runtime-verified: admin renders all four pages; an EMPLOYEE is 307-redirected from every `/admin` route (URL-manipulation check).
 
-### Phase 6 — Estimates & Projects
+### Phase 6 — Estimates & Projects  ✅ Complete
 **Model: Sonnet 5**
-- Estimate section (number, status Draft→Revised, amounts, dates, attachment placeholder)
-- Project conversion on approval (name, dates planned/actual, PM, contract amount, milestones, progress)
-- **Exit**: estimate lifecycle + project record + milestones tracked.
+- [x] Estimate section (number, status Draft→Revised, amounts, dates, attachment placeholder)
+- [x] Project conversion on approval (name, dates planned/actual, PM, contract amount, milestones, progress)
+- **Exit**: estimate lifecycle + project record + milestones tracked. ✅
 
-### Phase 7 — Testing & Hardening
+**What shipped:**
+- `lib/domain/estimateStatus.ts` — estimate state machine (`DRAFT → UNDER_REVIEW → SENT → ACCEPTED/DECLINED/EXPIRED`, with `REVISED` supersession; `ACCEPTED`/`REVISED` terminal), editability rule, labels (unit-tested).
+- `lib/domain/projectStatus.ts` — project state machine (`PLANNED → IN_PROGRESS ↔ ON_HOLD → COMPLETED/CANCELLED`), `requestStatusForProject` mapping to mirror onto the parent request, labels (unit-tested).
+- `lib/services/statusAdvance.ts` — shared `advanceRequestStatusTx` helper: best-effort, guarded advance of a work request inside a transaction (records status history + timeline activity, no email side-effect).
+- `lib/services/estimates.ts` — `createEstimate` / `updateEstimate` (draft/under-review only) / `changeEstimateStatus` (SENT stamps `sentAt`, advances request to ESTIMATE_SENT, emails the customer post-commit; ACCEPTED → APPROVED; DECLINED → DECLINED) / `reviseEstimate` (flips the original to REVISED, opens a fresh DRAFT copying figures). Estimate numbers `EST-YYYY-NNNNNN` allocated via the new **`EstimateCounter`** table. Every mutation audited.
+- `lib/services/projects.ts` — `createProjectFromEstimate` (guarded: estimate must be ACCEPTED, one project per request; advances request to PROJECT_SCHEDULED; contract defaults from the estimate) / `updateProject` (whitelisted fields) / `changeProjectStatus` (mirrors onto the request; auto-stamps actual start/end; archives on cancel) / `addMilestone` / `toggleMilestone` / `deleteMilestone`. Every mutation audited.
+- `lib/services/projectQueries.ts` — `listProjects` paginated with status/manager filters + milestone progress.
+- `lib/validation/estimate.ts` — Zod schemas (money + date formats) for estimate, project create/update, and milestone.
+- Schema: added `EstimateCounter`; extended `AuditAction` (estimate.*/project.*) and the `estimate:manage`/`project:manage` role actions (MANAGER+). Migration `20260714061931_estimate_counter`. Seed advances the estimate counter past seeded numbers.
+- UI: `EstimatesPanel` + `ProjectPanel` on the request detail page (`app/requests/[id]`), a manager-only cross-project `/projects` list page, a `Projects` nav link, `formatMoney` util, and the `renderEstimateSent` email template.
+- Tests: `tests/unit/estimateStatus.test.ts`, `tests/unit/projectStatus.test.ts`, `tests/integration/estimatesProjects.test.ts` (create/edit/send+email/accept/convert/milestones/status-mirror/revise + guard cases).
+
+### Phase 7 — Testing & Hardening  ✅ Complete
 **Model: Sonnet 5** (tests) + **Opus 4.8** (security review) + **Haiku 4.5** (doc polish)
-- Unit tests (validation, request-number, status transitions, authz helpers, notification decisions, status mapping, file rules)
-- Integration tests (creation/transaction, image metadata, assignment, status history, site visits, email log, categories, permissions)
-- Playwright journeys: Customer Intake, Employee Processing, Manager Assignment, Principal Admin, Authorization (5 negative cases)
-- Accessibility pass (WCAG 2.1 AA; test 375 / 768 / 1440px), security review, perf checks
-- Deployment guide, user guide, final validation report, screenshots
-- **Exit = Definition of Done** (prompt §24): all gates green, no known critical/high security issues.
+- [x] Unit tests (validation, request-number, status transitions, authz helpers, notification decisions, status mapping, file rules) — 9 unit files
+- [x] Integration tests (creation/transaction, image metadata, assignment, status history, site visits, email log, categories, permissions, estimates/projects) — 5 integration files
+- [x] Playwright journeys: Customer Intake, Employee Processing, Manager Assignment, Principal Admin, Authorization (5 negative cases) — `tests/e2e/`
+- [x] Accessibility notes (WCAG 2.1 AA; 375 / 768 / 1440px) + security review — see [SECURITY.md](SECURITY.md) and [VALIDATION_REPORT.md](VALIDATION_REPORT.md)
+- [x] Deployment guide, user guide, final validation report
+- **Exit = Definition of Done** (prompt §24): all gates green, no known critical/high security issues. ✅
+
+**What shipped:**
+- `tests/e2e/helpers.ts` (real credentials sign-in), `tests/e2e/auth.spec.ts` (5 authorization negatives: unauth → sign-in on dashboard + request URL, invalid-login error, employee blocked from `/admin` and `/projects`), `tests/e2e/customer-journey.spec.ts` (serial: public intake → confirmation number → admin status change + note → estimate draft/send/accept → project conversion + milestone → cross-project view), `tests/e2e/admin.spec.ts` (users list + category create). All 10 pass headless against a dev server.
+- Security review pass folded into `SECURITY.md` (estimate/project authz, IDOR posture, money handling, audit coverage).
+- New docs: `DEPLOYMENT.md`, `USER_GUIDE.md`, `VALIDATION_REPORT.md`.
 
 ---
 

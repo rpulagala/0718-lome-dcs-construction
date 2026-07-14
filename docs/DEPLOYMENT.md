@@ -1,0 +1,67 @@
+# DCS Construction — Deployment Guide
+
+Production-ready MVP. Target platform: **Vercel** (Next.js App Router) with a managed **PostgreSQL** database, **Vercel Blob** for photos, and **Resend** for email. Nothing here is Vercel-locked — any Node host + Postgres works.
+
+## 1. Prerequisites
+- Node.js 20+ and npm.
+- A PostgreSQL 15+ database (Neon, Supabase, RDS, or self-hosted).
+- A Resend account + verified sending domain (for real email).
+- A Vercel Blob store (or another S3-compatible bucket if you swap the storage adapter).
+
+## 2. Environment variables
+Set these in the host's environment (Vercel → Project → Settings → Environment Variables). See [`.env.example`](../.env.example) for the full list.
+
+| Variable | Purpose | Prod value |
+|---|---|---|
+| `DATABASE_URL` | Postgres connection string | managed Postgres URL (SSL) |
+| `AUTH_SECRET` | Auth.js session encryption | `openssl rand -base64 32` |
+| `AUTH_TRUST_HOST` | Trust the deployment host | `true` |
+| `NEXTAUTH_URL` / `APP_BASE_URL` | Canonical app URL | `https://app.dcs.example` |
+| `COMPANY_TIMEZONE` | Display timezone | e.g. `America/Los_Angeles` |
+| `EMAIL_MODE` | `log` or `resend` | `resend` |
+| `RESEND_API_KEY` | Resend API key | secret |
+| `EMAIL_FROM` | From header | `DCS Construction <noreply@dcs.example>` |
+| `INTAKE_NOTIFY_EMAILS` | Fallback intake alert recipients | comma list (also editable in Admin → Settings) |
+| `BLOB_MODE` | `local` or `vercel` | `vercel` |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob RW token | secret |
+| `MAX_UPLOAD_FILES` / `MAX_UPLOAD_MB` | Upload limits | `10` / `10` |
+
+> **Secrets never go in git.** `.env` is git-ignored; only `.env.example` (keys, no values) is committed.
+
+## 3. Database migration
+Run Prisma migrations against the production database as a **deploy step** (do not use `migrate dev` in prod):
+
+```bash
+npx prisma migrate deploy
+```
+
+On Vercel, add this to the build (or a release phase). The Prisma client is generated automatically via the `postinstall` script.
+
+- **Do not run `npm run seed` in production** — the seed wipes transactional data and inserts demo records. Instead, create the first principal admin manually (a one-off script or SQL insert with a bcrypt hash), then invite the rest of the team from **Admin → Users**.
+
+## 4. Build & deploy
+```bash
+npm ci
+npm run build      # next build (Turbopack) — must be green
+```
+On Vercel this is automatic on push. The included checks that must pass before deploy:
+```bash
+npm run lint && npm run typecheck && npm run test
+```
+
+## 5. First-run checklist
+1. Visit `/api/health` — expect `{"status":"ok","db":"ok"}`.
+2. Sign in as the principal admin.
+3. **Admin → Settings**: set company profile, service area, response message, intake recipients, upload limits.
+4. **Admin → Users**: invite managers/employees.
+5. **Admin → Categories**: confirm the project-category list.
+6. Submit a test request through the public `/request` form; confirm the confirmation email is logged/sent and the request appears on the dashboard.
+
+## 6. Post-deploy hardening (recommended)
+- Restrict the DB runtime role to DML (no DDL/superuser).
+- Wire the CAPTCHA/bot seam on the public form and confirm rate limits under load.
+- Add the security headers listed in [SECURITY.md](SECURITY.md) (CSP, HSTS, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`).
+- Configure log drains + error tracking (the app emits structured logs with correlation IDs).
+
+## 7. Rollback
+Vercel keeps immutable deployments — promote a previous deployment to roll back the app. Database migrations are forward-only; keep a backup/snapshot before `migrate deploy` so schema changes can be restored if needed.

@@ -115,6 +115,7 @@ async function wipeTransactionalData() {
   await prisma.address.deleteMany();
   await prisma.customer.deleteMany();
   await prisma.requestCounter.deleteMany();
+  await prisma.estimateCounter.deleteMany();
 }
 
 async function main() {
@@ -268,6 +269,14 @@ async function main() {
   // Advance the request-number counter past the seeded requests so newly
   // submitted requests continue from the next number (avoids collisions).
   await prisma.requestCounter.upsert({
+    where: { year: YEAR },
+    update: { lastValue: requestIds.length },
+    create: { year: YEAR, lastValue: requestIds.length },
+  });
+
+  // Seeded estimate numbers reuse the request sequence (max = requestIds.length),
+  // so advance the estimate counter past it to avoid collisions with new drafts.
+  await prisma.estimateCounter.upsert({
     where: { year: YEAR },
     update: { lastValue: requestIds.length },
     create: { year: YEAR, lastValue: requestIds.length },

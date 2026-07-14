@@ -32,6 +32,7 @@ export type Action =
   | "request:assign"
   | "request:archive"
   | "estimate:manage"
+  | "project:manage"
   | "reports:view"
   | "admin:users"
   | "admin:categories"
@@ -47,6 +48,7 @@ const MIN_ROLE: Record<Action, UserRole> = {
   "request:assign": "MANAGER",
   "request:archive": "MANAGER",
   "estimate:manage": "MANAGER",
+  "project:manage": "MANAGER",
   "reports:view": "MANAGER",
   "admin:users": "PRINCIPAL_ADMIN",
   "admin:categories": "PRINCIPAL_ADMIN",

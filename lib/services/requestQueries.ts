@@ -157,7 +157,16 @@ export async function getRequestDetail(id: string) {
         include: { loggedBy: { select: { name: true } } },
         orderBy: { occurredAt: "desc" },
       },
-      estimates: { orderBy: { createdAt: "desc" } },
+      estimates: {
+        include: { createdBy: { select: { name: true } } },
+        orderBy: { createdAt: "desc" },
+      },
+      project: {
+        include: {
+          projectManager: { select: { id: true, name: true } },
+          milestones: { orderBy: { sortOrder: "asc" } },
+        },
+      },
     },
   });
 }
@@ -169,6 +178,15 @@ export async function assignableUsers() {
   return prisma.user.findMany({
     where: { isActive: true, role: { in: ["EMPLOYEE", "MANAGER"] } },
     select: { id: true, name: true, role: true },
+    orderBy: { name: "asc" },
+  });
+}
+
+/** Active managers + principal admins — candidates to run a project. */
+export async function managerCandidates() {
+  return prisma.user.findMany({
+    where: { isActive: true, role: { in: ["MANAGER", "PRINCIPAL_ADMIN"] } },
+    select: { id: true, name: true },
     orderBy: { name: "asc" },
   });
 }

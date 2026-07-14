@@ -21,7 +21,15 @@ export type AuditAction =
   | "category.activate"
   | "category.deactivate"
   | "category.delete"
-  | "settings.update";
+  | "settings.update"
+  | "estimate.create"
+  | "estimate.update"
+  | "estimate.status_change"
+  | "estimate.revise"
+  | "project.create"
+  | "project.update"
+  | "project.status_change"
+  | "project.milestone";
 
 export interface AuditEntry {
   actorId: string | null;

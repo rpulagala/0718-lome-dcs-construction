@@ -549,3 +549,11 @@ model RequestCounter {
   lastValue Int      @default(0)
   updatedAt DateTime @updatedAt
 }
+
+// Per-year sequence for human-readable estimate numbers (EST-YYYY-NNNNNN),
+// allocated transactionally so concurrent draft creation never collides.
+model EstimateCounter {
+  year      Int      @id
+  lastValue Int      @default(0)
+  updatedAt DateTime @updatedAt
+}

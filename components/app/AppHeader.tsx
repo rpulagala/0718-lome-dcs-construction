@@ -13,6 +13,7 @@ export function AppHeader({
   user: { name?: string | null; role: string };
 }) {
   const isAdmin = user.role === "PRINCIPAL_ADMIN";
+  const isManager = isAdmin || user.role === "MANAGER";
   return (
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
@@ -30,6 +31,11 @@ export function AppHeader({
             <Link href="/calendar" className="text-slate-600 hover:text-slate-900">
               Calendar
             </Link>
+            {isManager && (
+              <Link href="/projects" className="text-slate-600 hover:text-slate-900">
+                Projects
+              </Link>
+            )}
             {isAdmin && (
               <Link href="/admin" className="text-slate-600 hover:text-slate-900">
                 Admin

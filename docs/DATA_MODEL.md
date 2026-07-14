@@ -1,6 +1,6 @@
 # DCS Construction — Data Model
 
-> **Status — 2026-07-13:** This schema is **implemented** in `prisma/schema.prisma` and applied to the local database via the `init` migration (Prisma 7 with the `pg` driver adapter; client generated to `lib/generated/prisma`). All 24 models exist. The customer-facing status mapping and `DCS-YYYY-NNNNNN` request-number generator are covered by passing unit tests; `createWorkRequest` persistence is covered by an integration test.
+> **Status — 2026-07-14:** This schema is **implemented** in `prisma/schema.prisma` and applied to the local database (Prisma 7 with the `pg` driver adapter; client generated to `lib/generated/prisma`). Two migrations: `init` and `estimate_counter` (Phase 6). All models exist, including the Phase-6 `EstimateCounter`. The customer-facing status mapping, the `DCS-YYYY-NNNNNN`/`EST-YYYY-NNNNNN` number generators, and the estimate/project state machines are covered by passing unit tests; `createWorkRequest` and the estimate→project pipeline are covered by integration tests.
 
 Normalized PostgreSQL schema via Prisma. UUID primary keys, separate human-readable request numbers, full history/audit preservation, soft-delete/archival for business records, UTC storage.
 
@@ -608,6 +608,14 @@ model AuditLog {
 
 // Per-year counter for human-readable request numbers (row-locked in txn)
 model RequestCounter {
+  year      Int      @id
+  lastValue Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+// Per-year counter for human-readable estimate numbers (EST-YYYY-NNNNNN),
+// added in Phase 6 — allocated exactly like RequestCounter, inside a txn.
+model EstimateCounter {
   year      Int      @id
   lastValue Int      @default(0)
   updatedAt DateTime @updatedAt

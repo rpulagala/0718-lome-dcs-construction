@@ -204,6 +204,46 @@ Open the console: ${link}`;
   return { subject, html, text };
 }
 
+export interface EstimateSentData {
+  customerName: string;
+  requestNumber: string;
+  estimateNumber: string;
+  amount?: string | null; // pre-formatted, e.g. "$12,500.00"
+  expires?: string | null; // pre-formatted date
+  customerNotes?: string | null;
+}
+
+export function renderEstimateSent(d: EstimateSentData): RenderedEmail {
+  const subject = `Your estimate ${d.estimateNumber} for request ${d.requestNumber}`;
+  const rows = [
+    `<tr><td style="color:#64748b;padding:2px 12px 2px 0">Estimate</td><td><strong>${d.estimateNumber}</strong></td></tr>`,
+    d.amount
+      ? `<tr><td style="color:#64748b;padding:2px 12px 2px 0">Amount</td><td><strong>${d.amount}</strong></td></tr>`
+      : "",
+    d.expires
+      ? `<tr><td style="color:#64748b;padding:2px 12px 2px 0">Valid until</td><td>${d.expires}</td></tr>`
+      : "",
+  ].join("");
+  const notes = d.customerNotes ? `<p style="color:#475569">${d.customerNotes}</p>` : "";
+  const html = shell(
+    "Your estimate is ready",
+    `<p>Hi ${d.customerName},</p>
+     <p>We&rsquo;ve prepared an estimate for your request <strong>${d.requestNumber}</strong>.</p>
+     <table style="font-size:14px;margin:12px 0">${rows}</table>
+     ${notes}
+     <p style="font-size:13px;color:#64748b">Questions or ready to proceed? Reply to this email or call our office.</p>`,
+  );
+  const text = `Hi ${d.customerName},
+
+We've prepared an estimate for your request ${d.requestNumber}.
+
+Estimate: ${d.estimateNumber}
+${d.amount ? `Amount: ${d.amount}\n` : ""}${d.expires ? `Valid until: ${d.expires}\n` : ""}${d.customerNotes ? `\n${d.customerNotes}\n` : ""}
+Questions or ready to proceed? Reply to this email or call our office.
+— DCS Construction`;
+  return { subject, html, text };
+}
+
 export interface UserInviteData {
   name: string;
   email: string;

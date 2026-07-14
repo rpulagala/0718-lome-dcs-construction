@@ -10,11 +10,23 @@ import { InternalGallery } from "@/components/requests/InternalGallery";
 import { SchedulePanel } from "@/components/requests/SchedulePanel";
 import { CommunicationForm } from "@/components/requests/CommunicationForm";
 import { TaskList } from "@/components/requests/TaskList";
-import { getRequestDetail, assignableUsers } from "@/lib/services/requestQueries";
+import { EstimatesPanel } from "@/components/requests/EstimatesPanel";
+import { ProjectPanel } from "@/components/requests/ProjectPanel";
+import { getRequestDetail, assignableUsers, managerCandidates } from "@/lib/services/requestQueries";
 import { allowedTransitions } from "@/lib/domain/statusMachine";
+import {
+  allowedEstimateTransitions,
+  isEstimateEditable,
+} from "@/lib/domain/estimateStatus";
+import { allowedProjectTransitions } from "@/lib/domain/projectStatus";
 import { toCustomerStatus, internalStatusLabel } from "@/lib/domain/status";
 import { isOverdue } from "@/lib/domain/businessHours";
-import { formatInCompanyTz } from "@/lib/utils";
+import { formatInCompanyTz, formatMoney } from "@/lib/utils";
+
+/** A stored UTC-midnight date rendered as a YYYY-MM-DD value for date inputs. */
+function toDateInput(d: Date | null | undefined): string {
+  return d ? d.toISOString().slice(0, 10) : "";
+}
 
 function fmt(d: Date | null | undefined) {
   if (!d) return "—";
@@ -72,6 +84,60 @@ export default async function RequestDetailPage({
     dueLabel: t.dueAt ? formatInCompanyTz(t.dueAt, { dateStyle: "medium" }) : null,
     assigneeName: t.assignee?.name ?? null,
   }));
+
+  const canEstimate = can(user.role, "estimate:manage");
+  const canProject = can(user.role, "project:manage");
+  const managers = canProject || canEstimate ? await managerCandidates() : [];
+
+  const estimates = r.estimates.map((e) => ({
+    id: e.id,
+    estimateNumber: e.estimateNumber,
+    status: e.status,
+    amountLabel: formatMoney(e.amount),
+    amountRaw: e.amount ? e.amount.toString() : "",
+    description: e.description ?? "",
+    customerNotes: e.customerNotes ?? "",
+    internalNotes: e.internalNotes ?? "",
+    expiresAt: toDateInput(e.expiresAt),
+    sentLabel: e.sentAt ? formatInCompanyTz(e.sentAt, { dateStyle: "medium" }) : null,
+    createdByName: e.createdBy?.name ?? null,
+    createdAtLabel: formatInCompanyTz(e.createdAt, { dateStyle: "medium" }),
+    editable: isEstimateEditable(e.status),
+    allowedTransitions: allowedEstimateTransitions(e.status),
+  }));
+
+  const acceptedEstimates = r.estimates
+    .filter((e) => e.status === "ACCEPTED")
+    .map((e) => ({ id: e.id, estimateNumber: e.estimateNumber, amountRaw: e.amount ? e.amount.toString() : "" }));
+
+  const project = r.project
+    ? {
+        id: r.project.id,
+        name: r.project.name,
+        status: r.project.status,
+        contractRaw: r.project.contractAmount ? r.project.contractAmount.toString() : "",
+        contractLabel: formatMoney(r.project.contractAmount),
+        plannedStart: toDateInput(r.project.plannedStartDate),
+        plannedEnd: toDateInput(r.project.plannedEndDate),
+        pmId: r.project.projectManagerId ?? "",
+        pmName: r.project.projectManager?.name ?? null,
+        internalNotes: r.project.internalNotes ?? "",
+        progressPct:
+          r.project.milestones.length === 0
+            ? 0
+            : Math.round(
+                (r.project.milestones.filter((m) => m.completedAt).length / r.project.milestones.length) * 100,
+              ),
+        allowedTransitions: allowedProjectTransitions(r.project.status),
+        milestones: r.project.milestones.map((m) => ({
+          id: m.id,
+          title: m.title,
+          description: m.description,
+          dueLabel: m.dueAt ? formatInCompanyTz(m.dueAt, { dateStyle: "medium" }) : null,
+          isComplete: m.completedAt !== null,
+        })),
+      }
+    : null;
 
   return (
     <>
@@ -200,6 +266,16 @@ export default async function RequestDetailPage({
                 </ul>
               )}
             </Card>
+
+            <EstimatesPanel requestId={r.id} estimates={estimates} canManage={canEstimate} />
+
+            <ProjectPanel
+              requestId={r.id}
+              project={project}
+              acceptedEstimates={acceptedEstimates}
+              managers={managers}
+              canManage={canProject}
+            />
 
             <Card title="Activity timeline">
               <ol className="space-y-2" data-testid="timeline">
