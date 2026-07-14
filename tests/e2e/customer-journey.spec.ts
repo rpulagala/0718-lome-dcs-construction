@@ -39,8 +39,9 @@ test.describe.serial("customer intake → estimate → project", () => {
 
   test("an admin finds and opens the new request, changes status, adds a note", async ({ page }) => {
     await signIn(page, "admin@dcs.example");
-    await page.getByTestId("dash-search").fill(requestNumber);
-    await page.getByTestId("dash-search").press("Enter");
+    await page.goto("/requests");
+    await page.getByTestId("requests-search").fill(requestNumber);
+    await page.getByTestId("requests-search").press("Enter");
     await page.getByRole("link", { name: requestNumber }).first().click();
 
     await expect(page.getByRole("heading", { name: new RegExp(requestNumber) })).toBeVisible();
@@ -58,8 +59,9 @@ test.describe.serial("customer intake → estimate → project", () => {
 
   test("the admin drafts, sends, and accepts an estimate", async ({ page }) => {
     await signIn(page, "admin@dcs.example");
-    await page.getByTestId("dash-search").fill(requestNumber);
-    await page.getByTestId("dash-search").press("Enter");
+    await page.goto("/requests");
+    await page.getByTestId("requests-search").fill(requestNumber);
+    await page.getByTestId("requests-search").press("Enter");
     await page.getByRole("link", { name: requestNumber }).first().click();
 
     await page.getByTestId("estimate-new").click();
@@ -76,8 +78,9 @@ test.describe.serial("customer intake → estimate → project", () => {
 
   test("the admin converts the accepted estimate into a tracked project", async ({ page }) => {
     await signIn(page, "admin@dcs.example");
-    await page.getByTestId("dash-search").fill(requestNumber);
-    await page.getByTestId("dash-search").press("Enter");
+    await page.goto("/requests");
+    await page.getByTestId("requests-search").fill(requestNumber);
+    await page.getByTestId("requests-search").press("Enter");
     await page.getByRole("link", { name: requestNumber }).first().click();
 
     await page.getByTestId("project-name").fill(`Project for ${requestNumber}`);

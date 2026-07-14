@@ -9,5 +9,5 @@ export async function signIn(page: Page, email: string, password = DEV_PASSWORD)
   await page.getByTestId("signin-password").fill(password);
   await page.getByTestId("signin-submit").click();
   await page.waitForURL("**/dashboard");
-  await expect(page.getByTestId("dash-search")).toBeVisible();
+  await expect(page.getByTestId("dashboard-overview")).toBeVisible();
 }
