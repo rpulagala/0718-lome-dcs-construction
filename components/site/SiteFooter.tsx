@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export function SiteFooter() {
   return (
     <footer className="mt-16 bg-brand-navy font-brand text-white">
@@ -18,12 +16,14 @@ export function SiteFooter() {
           <p>Service area: SF Bay Area</p>
         </div>
         <div className="text-sm font-light text-white/80">
-          <p className="font-semibold uppercase tracking-[0.15em] text-white">Company</p>
+          <p className="font-semibold uppercase tracking-[0.15em] text-white">Explore</p>
           <ul className="mt-3 space-y-1.5">
-            <li><Link href="/services" className="hover:text-white hover:underline">Services</Link></li>
-            <li><Link href="/request" className="hover:text-white hover:underline">Request a Site Visit</Link></li>
-            <li><Link href="/privacy" className="hover:text-white hover:underline">Privacy Policy</Link></li>
-            <li><Link href="/terms" className="hover:text-white hover:underline">Terms</Link></li>
+            <li><a href="https://www.dcsconstructs.com/#facilitiesmaintenance-section" className="hover:text-white hover:underline">Construction Services</a></li>
+            <li><a href="https://www.dcsconstructs.com/#construction-consultation-section" className="hover:text-white hover:underline">Building Consultation</a></li>
+            <li><a href="https://www.dcsconstructs.com/#facilities-maintenance-section" className="hover:text-white hover:underline">Facilities Maintenance</a></li>
+            <li><a href="https://www.dcsconstructs.com/#about-section" className="hover:text-white hover:underline">About</a></li>
+            <li><a href="https://www.dcsconstructs.com/#rsvp-section" className="hover:text-white hover:underline">Contact</a></li>
+            <li><a href="http://dancanhandymansf.blogspot.com/" className="hover:text-white hover:underline">Blog</a></li>
           </ul>
         </div>
       </div>
