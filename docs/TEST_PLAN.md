@@ -1,6 +1,6 @@
 # DCS Construction — Test Plan
 
-> **Status — 2026-07-14: 120 unit/integration tests (14 files) + 10 Playwright E2E tests passing**, typecheck + lint clean, `next build` green.
+> **Status — 2026-07-14: 120 unit/integration tests (14 files) + 11 Playwright E2E tests passing**, typecheck + lint clean, `next build` green.
 > **Unit (done):** request-number format/parse, status-transition machine, **estimate + project state machines**, role/`can()` authorization, customer-visible status mapping, business-hours SLA, file validation (magic bytes / size / filename sanitize), scheduling helpers, admin validation schemas (invite/category/settings).
 > **Integration (done):** `createWorkRequest` (persistence + email logging + idempotency); request mutations (`changeStatus` valid/invalid-transition guard + history, `assignRequest` + history, `addNote`, `setPriority`); scheduling (schedule/double-booking/reschedule/cancel/complete + notifications, communication + tasks); admin (user invite/role-change/activate/last-admin guard/resend, category CRUD + reorder + referenced-delete block, settings validate/persist/audit); **estimates & projects** (create/edit-guard/send+email/accept/decline/revise; convert-to-project + one-project guard; milestone add/complete/delete + sort order; project status mirrored onto the request).
 > **E2E (done, Phase 7):** all 5 journeys below, 10 specs, green headless against a dev server (`npm run test:e2e`).
@@ -37,6 +37,7 @@
 3. **Estimate → Project** (`customer-journey.spec.ts`): draft an estimate → send (customer email) → accept → convert to a project → add a milestone → confirm it appears on the cross-project `/projects` view. (Covers the manager/estimate journey.)
 4. **Principal Administrator** (`admin.spec.ts`): sign in (admin) → view users → add a project category.
 5. **Authorization (negatives)** (`auth.spec.ts`, 5 cases): unauthenticated → redirected from dashboard and from a request-detail URL; invalid credentials show an error; an employee is redirected from `/admin`; an employee is redirected from `/projects`.
+6. **Week calendar** (`calendar.spec.ts`): the grid + color legend render; clicking an employee chip filters the view (URL carries `assigned=`); week navigation preserves the filter.
 
 > **E2E ops note:** Playwright reuses an existing dev server on port 3000 (`reuseExistingServer` when not in CI). After `prisma generate`, **restart the dev server** — a long-running dev process bundles a stale Prisma client and will throw on new models (this bit us once with `EstimateCounter`).
 

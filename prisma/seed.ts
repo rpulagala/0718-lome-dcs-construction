@@ -89,6 +89,13 @@ function daysAgo(n: number): Date {
   return d;
 }
 
+/** `base` set to a whole business hour (local time) — for tidy calendar demos. */
+function atHour(base: Date, hour: number): Date {
+  const d = new Date(base);
+  d.setHours(hour, 0, 0, 0);
+  return d;
+}
+
 const PLACEHOLDER_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
   "base64",
@@ -236,15 +243,22 @@ async function main() {
     });
     requestIds.push(wr.id);
 
-    // Site visits for scheduled/completed statuses.
+    // Site visits for scheduled/completed statuses — placed at business hours and
+    // spread across days so the week calendar shows a realistic, colored schedule.
     if (status === "SITE_VISIT_SCHEDULED" || status === "SITE_VISIT_COMPLETED") {
+      const completed = status === "SITE_VISIT_COMPLETED";
+      const dayBase = completed ? daysAgo(2 + (i % 3)) : daysAgo(-(1 + (i % 5)));
+      const start = atHour(dayBase, 9 + (i % 4) * 2); // 9, 11, 13, or 15
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
       await prisma.siteVisit.create({
         data: {
           workRequestId: wr.id,
           addressId: address.id,
           assignedToId: assignTo?.id ?? employees[0].id,
-          scheduledDate: status === "SITE_VISIT_COMPLETED" ? daysAgo(3) : daysAgo(-2),
-          status: status === "SITE_VISIT_COMPLETED" ? "COMPLETED" : "CONFIRMED",
+          scheduledDate: start,
+          startTime: start,
+          endTime: end,
+          status: completed ? "COMPLETED" : "CONFIRMED",
           customerInstructions: "Ring the doorbell; dog is friendly.",
         },
       });

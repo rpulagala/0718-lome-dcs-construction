@@ -8,7 +8,7 @@
 | `npm run lint` | ✅ clean |
 | `npm run typecheck` (`tsc --noEmit`) | ✅ clean |
 | `npm run test` (Vitest) | ✅ **120 passing** (9 unit + 5 integration files) |
-| `npm run test:e2e` (Playwright) | ✅ **10 passing** (3 spec files) |
+| `npm run test:e2e` (Playwright) | ✅ **11 passing** (4 spec files) |
 | `npm run build` (`next build`) | ✅ green (19 routes) |
 | `/api/health` | ✅ `{status:ok, db:ok}` |
 
@@ -27,7 +27,7 @@
 | Admin manages users / categories / settings | ✅ | `/admin/*`; `admin.test.ts`; E2E `admin.spec.ts` |
 | Every change on a timeline / audit log | ✅ | `WorkRequestActivity` + status/assignment history + append-only `AuditLog` |
 | **Server-side authorization enforced** | ✅ | `requireCan(...)` on every mutation; E2E `auth.spec.ts` (5 negatives) |
-| Critical flows tested | ✅ | 130 automated tests across unit/integration/E2E |
+| Critical flows tested | ✅ | 131 automated tests across unit/integration/E2E |
 | Responsive & accessible | ✅ (see notes) | semantic HTML, labels, `role="status"/"alert"`, keyboard-operable controls, accessible lightbox |
 | Setup / deploy documented | ✅ | [DEPLOYMENT.md](DEPLOYMENT.md), [USER_GUIDE.md](USER_GUIDE.md), README |
 | No known critical/high security issues | ✅ | [SECURITY.md](SECURITY.md) Phase-7 review |

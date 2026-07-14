@@ -9,7 +9,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 Construction work intake & tracking web app (production-ready MVP). Full requirements: `project_requirement.txt`; original concept: `DCS Construction Site Map 3 (1).pdf`. Read `docs/` before making changes — especially [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) (phases + status), [DATA_MODEL.md](docs/DATA_MODEL.md), [ARCHITECTURE.md](docs/ARCHITECTURE.md), [SECURITY.md](docs/SECURITY.md), and [DECISIONS.md](docs/DECISIONS.md).
 
 ## Status — 2026-07-14
-Phases **0–7 complete and verified — feature-complete MVP**. **120 unit/integration tests + 10 Playwright E2E tests passing**, typecheck + lint clean, `next build` green.
+Phases **0–7 complete and verified — feature-complete MVP**. **120 unit/integration tests + 11 Playwright E2E tests passing**, typecheck + lint clean, `next build` green.
+
+The `/calendar` page is a **week-grid view** ([app/calendar/page.tsx](app/calendar/page.tsx) + [components/calendar/WeekGrid.tsx](components/calendar/WeekGrid.tsx)): site visits laid out by day/time, **color-coded per employee** (palette in [lib/domain/calendarView.ts](lib/domain/calendarView.ts)), with prev/next/today week nav and a legend that **filters to one employee** (or unassigned) via the `?assigned=` query param. Calendar time math uses local `Date` getters (MVP treats server-local as company tz).
 
 Phase 5 added the principal-admin area: user management (invite/edit/role/activate/deactivate/resend, last-admin guard), project-category management (add/rename/reorder/activate; delete blocked when referenced), company + workflow settings (validated per key), and an append-only audit log. Services in `lib/services/{audit,settings,userAdmin,categoryAdmin,auditQueries}.ts`; UI under `/admin/*` with `requireCan("admin:*")` + edge-middleware guards.
 
