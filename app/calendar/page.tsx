@@ -217,7 +217,7 @@ export default async function CalendarPage({
   return (
     <>
       <AppHeader user={user} />
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="max-w-7xl px-6 py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">Site visit calendar</h1>

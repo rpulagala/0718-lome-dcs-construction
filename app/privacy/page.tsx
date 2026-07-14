@@ -7,7 +7,7 @@ export default function PrivacyPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-6 py-12 prose prose-slate">
+      <main className="max-w-3xl px-6 py-12 prose prose-slate">
         <h1 className="text-2xl font-bold text-slate-900">Privacy Policy</h1>
         <p className="mt-4 text-slate-600">
           DCS Construction collects the information you submit through our work

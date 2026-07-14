@@ -77,7 +77,7 @@ export default async function DashboardPage({
   return (
     <>
       <AppHeader user={user} />
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="max-w-7xl px-6 py-8">
         <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
 
         <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Summary">

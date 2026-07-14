@@ -18,7 +18,7 @@ export default async function AdminSettingsPage() {
   return (
     <>
       <AppHeader user={user} />
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="max-w-5xl px-6 py-8">
         <h1 className="text-2xl font-semibold text-slate-900">Administration</h1>
         <AdminNav />
         <SettingsManager

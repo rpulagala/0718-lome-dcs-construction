@@ -15,7 +15,7 @@ export default function ServicesPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-6xl px-6 py-12">
+      <main className="max-w-6xl px-6 py-12">
         <div className="max-w-2xl">
           <h1 className="text-3xl font-bold text-slate-900">Construction Services</h1>
           <p className="mt-3 text-slate-600">

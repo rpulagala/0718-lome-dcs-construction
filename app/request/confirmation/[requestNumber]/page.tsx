@@ -27,7 +27,7 @@ export default async function ConfirmationPage({
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-2xl px-6 py-16">
+      <main className="max-w-2xl px-6 py-16">
         <div className="flex flex-col items-center text-center">
           <CheckCircle2 className="h-14 w-14 text-emerald-500" aria-hidden />
           <h1 className="mt-4 text-2xl font-bold text-slate-900">

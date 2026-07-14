@@ -44,7 +44,7 @@ export default async function ProjectsPage({
   return (
     <>
       <AppHeader user={user} />
-      <main className="mx-auto max-w-6xl px-6 py-8">
+      <main className="max-w-6xl px-6 py-8">
         <h1 className="text-2xl font-semibold text-slate-900">Projects</h1>
         <p className="mt-1 text-sm text-slate-500">{total} project{total === 1 ? "" : "s"} total.</p>
 

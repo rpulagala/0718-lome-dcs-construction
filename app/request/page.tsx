@@ -21,7 +21,7 @@ export default async function RequestPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-6 py-12">
+      <main className="max-w-3xl px-6 py-12">
         <h1 className="text-3xl font-bold text-slate-900">Request a Site Visit</h1>
         <p className="mt-2 text-slate-600">
           Share a few details about your project and our team will get back to you

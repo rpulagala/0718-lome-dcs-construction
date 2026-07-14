@@ -142,7 +142,7 @@ export default async function RequestDetailPage({
   return (
     <>
       <AppHeader user={user} />
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="max-w-7xl px-6 py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <Link href="/dashboard" className="text-sm text-slate-500 hover:underline">
