@@ -215,35 +215,42 @@ export default async function RequestDetailPage({
               <InternalGallery photos={r.photos.map((p) => ({ id: p.id, storageKey: p.storageKey, fileName: p.fileName }))} />
             </Card>
 
-            <NoteForm requestId={r.id} />
-
-            <Card title="Internal notes">
-              {internalNotes.length === 0 ? (
-                <p className="text-sm text-slate-400">No internal notes yet.</p>
-              ) : (
-                <ul className="space-y-3">
-                  {internalNotes.map((n) => (
-                    <li key={n.id} className="text-sm">
-                      <div className="text-slate-800">{n.body}</div>
-                      <div className="text-xs text-slate-400">{n.author.name} · {fmt(n.createdAt)}</div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Card>
-
-            {customerNotes.length > 0 && (
-              <Card title="Customer-visible notes">
-                <ul className="space-y-3">
-                  {customerNotes.map((n) => (
-                    <li key={n.id} className="text-sm">
-                      <div className="text-slate-800">{n.body}</div>
-                      <div className="text-xs text-slate-400">{n.author.name} · {fmt(n.createdAt)}</div>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            )}
+            {/* Notes — one card: add a note + internal + customer-visible */}
+            <section className="rounded-lg border border-slate-200 bg-white">
+              <div className="p-4">
+                <NoteForm requestId={r.id} />
+              </div>
+              <div className="border-t border-slate-100 p-4">
+                <h2 className="mb-2 text-sm font-semibold text-slate-900">Internal notes</h2>
+                {internalNotes.length === 0 ? (
+                  <p className="text-sm text-slate-400">No internal notes yet.</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {internalNotes.map((n) => (
+                      <li key={n.id} className="text-sm">
+                        <div className="text-slate-800">{n.body}</div>
+                        <div className="text-xs text-slate-400">{n.author.name} · {fmt(n.createdAt)}</div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="border-t border-slate-100 p-4">
+                <h2 className="mb-2 text-sm font-semibold text-slate-900">Customer-visible notes</h2>
+                {customerNotes.length === 0 ? (
+                  <p className="text-sm text-slate-400">No customer-visible notes yet.</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {customerNotes.map((n) => (
+                      <li key={n.id} className="text-sm">
+                        <div className="text-slate-800">{n.body}</div>
+                        <div className="text-xs text-slate-400">{n.author.name} · {fmt(n.createdAt)}</div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
 
             <TaskList requestId={r.id} tasks={tasks} users={users} />
 

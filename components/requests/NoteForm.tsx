@@ -25,7 +25,7 @@ export function NoteForm({ requestId }: { requestId: string }) {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div>
       <h3 className="text-sm font-semibold text-slate-900">Add a note</h3>
       <textarea
         value={body}
