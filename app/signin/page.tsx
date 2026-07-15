@@ -9,8 +9,10 @@ function SignInForm() {
   const params = useSearchParams();
   const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Demo convenience: prefill the seeded admin credentials so the sign-in page
+  // is one click to demo. Remove these defaults before real production use.
+  const [email, setEmail] = useState("admin@dcs.example");
+  const [password, setPassword] = useState("Password123!");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
