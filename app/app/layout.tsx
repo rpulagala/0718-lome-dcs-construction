@@ -1,0 +1,31 @@
+import type { Metadata, Viewport } from "next";
+import { TabBar } from "@/components/portal/TabBar";
+import { RegisterSW } from "@/components/portal/RegisterSW";
+
+export const metadata: Metadata = {
+  title: "DCS Construction",
+  description: "Track your DCS Construction requests, projects, estimates, and messages.",
+  appleWebApp: { capable: true, title: "DCS", statusBarStyle: "black-translucent" },
+  icons: { apple: "/apple-touch-icon.png" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#024988",
+  viewportFit: "cover",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
+/** Mobile app shell — a phone-width column with a bottom tab bar. */
+export default function PortalLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-[100dvh] bg-slate-200 font-brand text-brand-ink">
+      <RegisterSW />
+      <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-slate-50 shadow-xl">
+        <main className="flex-1">{children}</main>
+        <TabBar />
+      </div>
+    </div>
+  );
+}

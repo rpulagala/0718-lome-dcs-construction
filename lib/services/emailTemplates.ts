@@ -279,6 +279,25 @@ If you weren't expecting this, please contact your administrator.
   return { subject, html, text };
 }
 
+export interface PortalLoginCodeData {
+  code: string;
+}
+
+export function renderPortalLoginCode(d: PortalLoginCodeData): RenderedEmail {
+  const subject = `Your DCS Construction sign-in code: ${d.code}`;
+  const html = shell(
+    "Your sign-in code",
+    `<p>Use this code to sign in to the DCS Construction app:</p>
+     <p style="font-size:30px;font-weight:bold;letter-spacing:6px;color:#024988;margin:16px 0">${d.code}</p>
+     <p style="font-size:13px;color:#64748b">This code expires in 10 minutes. If you didn&rsquo;t request it, you can ignore this email.</p>`,
+  );
+  const text = `Your DCS Construction sign-in code is: ${d.code}
+
+This code expires in 10 minutes. If you didn't request it, you can ignore this email.
+— DCS Construction`;
+  return { subject, html, text };
+}
+
 export interface InternalAlertData {
   requestNumber: string;
   categoryName: string;

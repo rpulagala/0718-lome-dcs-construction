@@ -193,6 +193,8 @@ model WorkRequest {
   requestNumber        String          @unique
   customerId           String
   customer             Customer        @relation(fields: [customerId], references: [id])
+  customerAccountId    String?
+  customerAccount      CustomerAccount? @relation(fields: [customerAccountId], references: [id])
   addressId            String
   address              Address         @relation(fields: [addressId], references: [id])
   categoryId           String
@@ -240,6 +242,7 @@ model WorkRequest {
   @@index([assignedToId])
   @@index([categoryId])
   @@index([customerId])
+  @@index([customerAccountId])
   @@index([createdAt])
   @@index([priority])
   @@index([responseDueAt])
@@ -506,6 +509,36 @@ model EmailLog {
 
   @@index([status])
   @@index([relatedRequestId])
+}
+
+// ----- Client portal (customer-facing app) -----
+// A canonical customer identity that logs in to the client app. Work requests
+// are linked to it (by verified email) so one customer sees all their jobs.
+model CustomerAccount {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  name        String?
+  phone       String?
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workRequests WorkRequest[]
+
+  @@index([email])
+}
+
+// Passwordless one-time login codes for the client app (hashed, short-lived).
+model CustomerLoginCode {
+  id         String    @id @default(uuid())
+  email      String
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
 }
 
 model CustomerAccessToken {
