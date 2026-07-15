@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 export default function PortalSignIn() {
   const router = useRouter();
   const [step, setStep] = useState<"email" | "code">("email");
-  const [email, setEmail] = useState("");
+  // Demo convenience: prefill a seeded customer with a full showcase project
+  // (Eleanor Whitfield — "Whitfield Kitchen Gut Renovation"), so the demo lands
+  // on populated data. Change/remove before real customer use.
+  const [email, setEmail] = useState("eleanor.w@example.com");
   const [code, setCode] = useState("");
   const [devCode, setDevCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
