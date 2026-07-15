@@ -14,7 +14,7 @@
 > | 7 — Testing & hardening | ✅ Complete & verified |
 > | 8 — Deploy + branding/UX polish | ✅ Complete — live on Vercel |
 >
-> **Client app (customer portal)** — a separate iPhone-style PWA under `/app`, planned in [CLIENT_APP_PLAN.md](CLIENT_APP_PLAN.md). Phases **C0 (design) + C1 (foundation: CustomerAccount + passwordless auth + mobile app shell + PWA)** are **complete and verified locally** (129 tests, build green); **not deployed**. C2 (project/request tracking) onward pending.
+> **Client app (customer portal)** — a separate iPhone-style PWA under `/app`, planned in [CLIENT_APP_PLAN.md](CLIENT_APP_PLAN.md). Phases **C0 (design) + C1 (foundation: CustomerAccount + passwordless auth + mobile app shell + PWA) + C2 (Home dashboard, Active/Completed Projects list, and request/project detail — account-scoped tracking with strict per-customer isolation)** are **complete and verified locally** (136 tests, build green); **not deployed**. C3 (in-app request creation) onward pending.
 
 > Work intake & tracking web application (production-ready MVP)
 > Source of truth: `project_requirement.txt` (the build prompt) + `DCS Construction Site Map 3 (1).pdf` (original 3-year-old rough concept)

@@ -18,13 +18,15 @@ Public-facing intake form (unauthenticated, accepts file uploads) + internal RBA
 ## Authentication
 - Internal users: Auth.js Credentials provider, passwords hashed with **bcrypt** (cost ≥ 12). Sessions via secure, httpOnly, sameSite cookies.
 - Deactivated users (`User.isActive = false`) are rejected at sign-in and on every request (checked in session callback / middleware).
-- Customers do **not** get accounts in the MVP. Request-status access is via a **signed, expiring, single-use magic link** — the raw token is emailed; only a hash (`CustomerAccessToken.tokenHash`) is stored.
+- Request-status access (staff-triggered, no login) is via a **signed, expiring, single-use magic link** — the raw token is emailed; only a hash (`CustomerAccessToken.tokenHash`) is stored.
+- **Client portal (customer app, `/app`)** — customers sign in with a **passwordless 6-digit email code** (`CustomerLoginCode`, hashed at rest, single-use, expiring, rate-limited/attempt-capped) and hold a **self-contained HMAC-signed session cookie** ([lib/portal/session.ts](../lib/portal/session.ts)) that is entirely **separate from the staff Auth.js session**. The code request never reveals whether an account exists.
 
 ## Authorization (server-enforced)
 - Role hierarchy: `EMPLOYEE < MANAGER < PRINCIPAL_ADMIN`.
 - Central `authorize(session, action, resource)` helper used in every server action / route handler. **Hiding a UI button is never the control.**
 - Route groups: `/(public)`, `/(app)` (employee+), `/(app)/admin` (principal admin only). Enforced in middleware **and** re-checked in each server action.
 - IDOR protection: every request/photo/estimate fetch is scoped by role; employees only see authorized requests; customers only reach data tied to their validated token.
+- **Client portal isolation** — every portal read goes through [lib/services/portalData.ts](../lib/services/portalData.ts) scoped to the signed-in `customerAccountId`; detail lookups use `findFirst({ where: { id, customerAccountId } })` so an id the customer doesn't own resolves to **404**, never another customer's data. Responses are shaped to **least-data** (only `CUSTOMER_VISIBLE` notes, only **sent** estimates, customer-facing status labels — never internal notes/statuses/staff assignments). Portal photos stream through a **separate, ownership-checked** route ([app/api/portal/files/[...key]/route.ts](../app/api/portal/files/%5B...key%5D/route.ts)) that serves a key only when it belongs to a request linked to the account — the staff `/api/files` route is never trusted for portal access. Codified by the `tests/integration/portalData.test.ts` isolation suite (list scoping, detail-ownership IDOR negative, notes/estimate least-data).
 
 ## Input validation & output handling
 - **Zod** schemas shared client + server; server is authoritative.
