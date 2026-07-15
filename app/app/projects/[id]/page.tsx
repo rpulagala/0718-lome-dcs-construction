@@ -25,8 +25,8 @@ function Section({
   icon?: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4">
-      <h2 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-brand-ink">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+      <h2 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-brand-ink dark:text-slate-100">
         {icon}
         {title}
       </h2>
@@ -141,19 +141,19 @@ export default async function PortalRequestDetail({
       <div className="px-5 pt-6">
         <Link
           href="/app/projects"
-          className="inline-flex items-center gap-1 text-sm font-medium text-brand-navy"
+          className="inline-flex items-center gap-1 text-sm font-medium text-brand-navy dark:text-blue-300"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden />
           Projects
         </Link>
-        <h1 className="mt-3 text-[26px] font-bold leading-tight tracking-tight text-brand-ink">
+        <h1 className="mt-3 text-[26px] font-bold leading-tight tracking-tight text-brand-ink dark:text-slate-100">
           {detail.title}
         </h1>
         <div className="mt-2 flex items-center gap-2">
           <StatusPill status={detail.customerStatus} />
-          <span className="text-xs text-slate-400">{detail.requestNumber}</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">{detail.requestNumber}</span>
         </div>
-        <p className="mt-1 text-xs text-slate-400">Submitted {fmtDate(detail.submittedAt)}</p>
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Submitted {fmtDate(detail.submittedAt)}</p>
         <Link
           href={`/app/messages/${detail.id}`}
           className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-navy px-4 py-2 text-sm font-semibold text-white"
@@ -174,9 +174,9 @@ export default async function PortalRequestDetail({
         )}
 
         <Section title="Details" icon={<FileText className="h-4 w-4 text-slate-400" aria-hidden />}>
-          <p className="whitespace-pre-wrap text-sm text-slate-600">{detail.description}</p>
-          <div className="mt-3 flex items-start gap-1.5 text-sm text-slate-500">
-            <MapPin className="mt-0.5 h-4 w-4 flex-none text-slate-400" aria-hidden />
+          <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{detail.description}</p>
+          <div className="mt-3 flex items-start gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+            <MapPin className="mt-0.5 h-4 w-4 flex-none text-slate-400 dark:text-slate-500" aria-hidden />
             <span>
               {addr.street}
               {addr.unit ? `, ${addr.unit}` : ""}
@@ -192,20 +192,20 @@ export default async function PortalRequestDetail({
               {detail.estimates.map((e) => (
                 <li
                   key={e.id}
-                  className="rounded-xl border border-slate-200 p-3"
+                  className="rounded-xl border border-slate-200 p-3 dark:border-slate-800"
                   data-testid="estimate-item"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-base font-semibold text-brand-ink">{e.amountLabel}</span>
-                    <span className="text-xs font-medium text-amber-700">{e.statusLabel}</span>
+                    <span className="text-base font-semibold text-brand-ink dark:text-slate-100">{e.amountLabel}</span>
+                    <span className="text-xs font-medium text-amber-700 dark:text-amber-400">{e.statusLabel}</span>
                   </div>
-                  <p className="mt-0.5 text-xs text-slate-400">
+                  <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
                     {e.estimateNumber}
                     {e.sentAt ? ` · Sent ${fmtDate(e.sentAt)}` : ""}
                     {e.expiresAt ? ` · Expires ${fmtDate(e.expiresAt)}` : ""}
                   </p>
                   {e.customerNotes && (
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{e.customerNotes}</p>
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{e.customerNotes}</p>
                   )}
                   {e.canRespond && (
                     <EstimateActions estimateId={e.id} amountLabel={e.amountLabel} />
@@ -224,9 +224,9 @@ export default async function PortalRequestDetail({
             <ul className="space-y-3">
               {detail.siteVisits.map((v) => (
                 <li key={v.id} className="text-sm" data-testid="site-visit">
-                  <p className="font-medium text-brand-ink">{fmtDateTime(v.scheduledDate)}</p>
+                  <p className="font-medium text-brand-ink dark:text-slate-100">{fmtDateTime(v.scheduledDate)}</p>
                   {v.customerInstructions && (
-                    <p className="mt-0.5 text-slate-600">{v.customerInstructions}</p>
+                    <p className="mt-0.5 text-slate-600 dark:text-slate-300">{v.customerInstructions}</p>
                   )}
                 </li>
               ))}
@@ -239,10 +239,10 @@ export default async function PortalRequestDetail({
             <ol className="space-y-3">
               {detail.updates.map((u) => (
                 <li key={u.id} className="flex gap-3 text-sm" data-testid="update-item">
-                  <div className="mt-1 h-2 w-2 flex-none rounded-full bg-brand-navy" aria-hidden />
+                  <div className="mt-1 h-2 w-2 flex-none rounded-full bg-brand-navy dark:bg-blue-400" aria-hidden />
                   <div>
-                    <p className="text-slate-700">{u.summary}</p>
-                    <p className="text-xs text-slate-400">{fmtDateTime(u.createdAt)}</p>
+                    <p className="text-slate-700 dark:text-slate-300">{u.summary}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">{fmtDateTime(u.createdAt)}</p>
                   </div>
                 </li>
               ))}
@@ -254,9 +254,9 @@ export default async function PortalRequestDetail({
           <Section title="Notes from the team">
             <ul className="space-y-3">
               {detail.notes.map((n) => (
-                <li key={n.id} className="rounded-xl bg-slate-50 p-3 text-sm" data-testid="note-item">
-                  <p className="whitespace-pre-wrap text-slate-700">{n.body}</p>
-                  <p className="mt-1 text-xs text-slate-400">
+                <li key={n.id} className="rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800" data-testid="note-item">
+                  <p className="whitespace-pre-wrap text-slate-700 dark:text-slate-200">{n.body}</p>
+                  <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
                     {n.author} · {fmtDate(n.createdAt)}
                   </p>
                 </li>

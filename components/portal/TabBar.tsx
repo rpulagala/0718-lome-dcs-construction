@@ -16,7 +16,10 @@ export function TabBar() {
   if (pathname === "/app/signin") return null;
 
   return (
-    <nav className="sticky bottom-0 z-20 border-t border-slate-200 bg-white/85 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+    <nav
+      aria-label="Primary"
+      className="sticky bottom-0 z-20 border-t border-slate-200 bg-white/85 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/85"
+    >
       <ul className="flex">
         {TABS.map(({ href, label, Icon, isActive }) => {
           const active = isActive(pathname);
@@ -24,8 +27,11 @@ export function TabBar() {
             <li key={href} className="flex-1">
               <Link
                 href={href}
-                className={`flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors ${
-                  active ? "text-brand-navy" : "text-slate-400 hover:text-slate-600"
+                aria-current={active ? "page" : undefined}
+                className={`flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-navy ${
+                  active
+                    ? "text-brand-navy dark:text-blue-300"
+                    : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                 }`}
               >
                 <Icon className="h-6 w-6" strokeWidth={active ? 2.4 : 1.8} aria-hidden />

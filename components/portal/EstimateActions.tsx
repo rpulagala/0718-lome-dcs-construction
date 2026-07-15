@@ -40,8 +40,8 @@ export function EstimateActions({
   if (confirm) {
     const accepting = confirm === "accept";
     return (
-      <div className="mt-3 rounded-xl bg-slate-50 p-3" data-testid="estimate-confirm">
-        <p className="text-sm text-slate-700">
+      <div className="mt-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-800" data-testid="estimate-confirm">
+        <p className="text-sm text-slate-700 dark:text-slate-200">
           {accepting
             ? `Accept this estimate for ${amountLabel}? This starts your project and the team will be notified.`
             : "Decline this estimate? You can still message the team if you have questions."}
@@ -62,7 +62,7 @@ export function EstimateActions({
             type="button"
             disabled={pending}
             onClick={() => setConfirm(null)}
-            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60"
+            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 disabled:opacity-60 dark:border-slate-700 dark:text-slate-300"
           >
             Cancel
           </button>
@@ -78,7 +78,7 @@ export function EstimateActions({
           type="button"
           onClick={() => setConfirm("accept")}
           data-testid="estimate-accept"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-transform active:scale-[0.98]"
         >
           <Check className="h-4 w-4" aria-hidden />
           Accept
@@ -87,7 +87,7 @@ export function EstimateActions({
           type="button"
           onClick={() => setConfirm("decline")}
           data-testid="estimate-decline"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition-transform active:scale-[0.98] dark:border-slate-700 dark:text-slate-300"
         >
           <X className="h-4 w-4" aria-hidden />
           Decline

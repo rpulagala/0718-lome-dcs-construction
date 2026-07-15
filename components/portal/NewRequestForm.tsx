@@ -31,7 +31,7 @@ const STEP_FIELDS: (keyof FormInput)[][] = [
 ];
 
 const inputClass =
-  "mt-1 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-navy";
+  "mt-1 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-navy dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-400";
 
 export function NewRequestForm({
   categories,
@@ -116,21 +116,21 @@ export function NewRequestForm({
     return (
       <div className="px-5 pt-10 text-center" data-testid="portal-request-success">
         <CheckCircle2 className="mx-auto h-14 w-14 text-emerald-500" aria-hidden />
-        <h1 className="mt-4 text-2xl font-bold text-brand-ink">Request sent!</h1>
-        <p className="mt-2 text-sm text-slate-500">
+        <h1 className="mt-4 text-2xl font-bold text-brand-ink dark:text-slate-100">Request sent!</h1>
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
           Thanks — the DCS team has your request{" "}
-          <span className="font-semibold text-brand-ink">{done.requestNumber}</span> and will be in
+          <span className="font-semibold text-brand-ink dark:text-slate-200">{done.requestNumber}</span> and will be in
           touch soon. You&apos;ll see updates here as it progresses.
         </p>
         <div className="mt-8 space-y-3">
           <Link
             href={`/app/projects/${done.id}`}
-            className="block rounded-full bg-brand-navy py-3 text-sm font-semibold text-white"
+            className="block rounded-full bg-brand-navy py-3 text-sm font-semibold text-white transition-transform active:scale-[0.99]"
             data-testid="view-new-request"
           >
             View request
           </Link>
-          <Link href="/app/projects" className="block py-2 text-sm font-medium text-brand-navy">
+          <Link href="/app/projects" className="block py-2 text-sm font-medium text-brand-navy dark:text-blue-300">
             Back to projects
           </Link>
         </div>
@@ -144,12 +144,12 @@ export function NewRequestForm({
         <button
           type="button"
           onClick={() => (step === 0 ? router.push("/app/projects") : setStep((s) => s - 1))}
-          className="inline-flex items-center gap-1 text-sm font-medium text-brand-navy"
+          className="inline-flex items-center gap-1 text-sm font-medium text-brand-navy dark:text-blue-300"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden />
           {step === 0 ? "Cancel" : "Back"}
         </button>
-        <h1 className="mt-3 text-[26px] font-bold leading-tight tracking-tight text-brand-ink">
+        <h1 className="mt-3 text-[26px] font-bold leading-tight tracking-tight text-brand-ink dark:text-slate-100">
           New request
         </h1>
         {/* Step progress */}
@@ -157,7 +157,7 @@ export function NewRequestForm({
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-brand-navy" : "bg-slate-200"}`}
+              className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-brand-navy" : "bg-slate-200 dark:bg-slate-800"}`}
             />
           ))}
         </div>
@@ -168,7 +168,7 @@ export function NewRequestForm({
         {step === 0 && (
           <div className="space-y-4">
             <div>
-              <label htmlFor="categoryId" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="categoryId" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 What kind of work? *
               </label>
               <select
@@ -190,7 +190,7 @@ export function NewRequestForm({
               {fieldError("categoryId")}
             </div>
             <div>
-              <label htmlFor="description" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="description" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 Describe your project *
               </label>
               <textarea
@@ -204,13 +204,13 @@ export function NewRequestForm({
               {fieldError("description")}
             </div>
             <div>
-              <label htmlFor="budgetRange" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="budgetRange" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 Budget range (optional)
               </label>
               <input id="budgetRange" className={inputClass} {...register("budgetRange")} />
             </div>
             <div>
-              <label htmlFor="desiredTimeframe" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="desiredTimeframe" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 When would you like to start? (optional)
               </label>
               <input id="desiredTimeframe" className={inputClass} {...register("desiredTimeframe")} />
@@ -222,21 +222,21 @@ export function NewRequestForm({
         {step === 1 && (
           <div className="space-y-4">
             <div>
-              <label htmlFor="fullName" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="fullName" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 Your name *
               </label>
               <input id="fullName" className={inputClass} data-testid="np-name" {...register("fullName")} />
               {fieldError("fullName")}
             </div>
             <div>
-              <label htmlFor="phone" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="phone" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 Phone *
               </label>
               <input id="phone" className={inputClass} data-testid="np-phone" {...register("phone")} />
               {fieldError("phone")}
             </div>
             <div>
-              <label htmlFor="preferredContact" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="preferredContact" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 Preferred contact method *
               </label>
               <select id="preferredContact" className={inputClass} {...register("preferredContact")}>
@@ -246,28 +246,28 @@ export function NewRequestForm({
               </select>
             </div>
             <div>
-              <label htmlFor="street" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="street" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 Street address *
               </label>
               <input id="street" className={inputClass} data-testid="np-street" {...register("street")} />
               {fieldError("street")}
             </div>
             <div>
-              <label htmlFor="unit" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="unit" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 Unit / suite (optional)
               </label>
               <input id="unit" className={inputClass} {...register("unit")} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="city" className="text-sm font-medium text-brand-ink">
+                <label htmlFor="city" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                   City *
                 </label>
                 <input id="city" className={inputClass} data-testid="np-city" {...register("city")} />
                 {fieldError("city")}
               </div>
               <div>
-                <label htmlFor="state" className="text-sm font-medium text-brand-ink">
+                <label htmlFor="state" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                   State *
                 </label>
                 <input id="state" className={inputClass} data-testid="np-state" {...register("state")} />
@@ -275,7 +275,7 @@ export function NewRequestForm({
               </div>
             </div>
             <div>
-              <label htmlFor="zip" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="zip" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 ZIP code *
               </label>
               <input id="zip" className={inputClass} data-testid="np-zip" {...register("zip")} />
@@ -288,8 +288,8 @@ export function NewRequestForm({
         {step === 2 && (
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-brand-ink">Photos (optional)</p>
-              <p className="mb-2 text-xs text-slate-500">
+              <p className="text-sm font-medium text-brand-ink dark:text-slate-200">Photos (optional)</p>
+              <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
                 Photos help us understand the work. Add from your camera or library.
               </p>
               <PhotoUploader
@@ -299,7 +299,7 @@ export function NewRequestForm({
               />
             </div>
             <div>
-              <label htmlFor="additionalNotes" className="text-sm font-medium text-brand-ink">
+              <label htmlFor="additionalNotes" className="text-sm font-medium text-brand-ink dark:text-slate-200">
                 Anything else? (optional)
               </label>
               <textarea
@@ -314,7 +314,7 @@ export function NewRequestForm({
 
         {serverError && (
           <p
-            className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700"
+            className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300"
             role="alert"
             data-testid="np-error"
           >
@@ -327,7 +327,7 @@ export function NewRequestForm({
             <button
               type="button"
               onClick={next}
-              className="w-full rounded-full bg-brand-navy py-3 text-sm font-semibold text-white"
+              className="w-full rounded-full bg-brand-navy py-3 text-sm font-semibold text-white transition-transform active:scale-[0.99]"
               data-testid="np-next"
             >
               Continue
@@ -336,7 +336,7 @@ export function NewRequestForm({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-full bg-brand-red py-3 text-sm font-semibold text-white disabled:opacity-60"
+              className="w-full rounded-full bg-brand-red py-3 text-sm font-semibold text-white transition-transform active:scale-[0.99] disabled:opacity-60"
               data-testid="np-submit"
             >
               {isSubmitting ? "Sending…" : "Submit request"}

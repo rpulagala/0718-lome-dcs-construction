@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { TabBar } from "@/components/portal/TabBar";
 import { RegisterSW } from "@/components/portal/RegisterSW";
+import { PortalThemeProvider } from "@/components/portal/PortalTheme";
 
 export const metadata: Metadata = {
   title: "DCS Construction",
@@ -20,12 +21,14 @@ export const viewport: Viewport = {
 /** Mobile app shell — a phone-width column with a bottom tab bar. */
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-[100dvh] bg-slate-200 font-brand text-brand-ink">
-      <RegisterSW />
-      <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-slate-50 shadow-xl">
-        <main className="flex-1">{children}</main>
-        <TabBar />
+    <PortalThemeProvider>
+      <div className="min-h-[100dvh] bg-slate-200 font-brand text-brand-ink dark:bg-black dark:text-slate-100">
+        <RegisterSW />
+        <div className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-slate-50 shadow-xl dark:bg-slate-950">
+          <main className="flex-1">{children}</main>
+          <TabBar />
+        </div>
       </div>
-    </div>
+    </PortalThemeProvider>
   );
 }

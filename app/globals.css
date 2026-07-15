@@ -130,6 +130,17 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Accessibility: honor the OS "reduce motion" setting across the app. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
   html {
     /* Brand typeface (Source Sans 3 — Freight Sans match) app-wide to mirror dcsconstructs.com */
     font-family: var(--font-brand), ui-sans-serif, system-ui, -apple-system, sans-serif;

@@ -82,19 +82,19 @@ export function MessageThread({
   return (
     <div className="flex min-h-[100dvh] flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 px-4 pt-6 pb-3 backdrop-blur">
-        <Link href="/app/messages" className="inline-flex items-center gap-1 text-sm font-medium text-brand-navy">
+      <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 px-4 pt-6 pb-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
+        <Link href="/app/messages" className="inline-flex items-center gap-1 text-sm font-medium text-brand-navy dark:text-blue-300">
           <ChevronLeft className="h-4 w-4" aria-hidden />
           Messages
         </Link>
-        <h1 className="mt-1 truncate text-lg font-bold text-brand-ink">{title}</h1>
-        <p className="text-xs text-slate-400">{requestNumber}</p>
+        <h1 className="mt-1 truncate text-lg font-bold text-brand-ink dark:text-slate-100">{title}</h1>
+        <p className="text-xs text-slate-400 dark:text-slate-500">{requestNumber}</p>
       </div>
 
       {/* Messages */}
       <div className="flex-1 space-y-3 px-4 py-4" data-testid="message-list">
         {messages.length === 0 && (
-          <p className="mt-8 text-center text-sm text-slate-400">
+          <p className="mt-8 text-center text-sm text-slate-400 dark:text-slate-500">
             No messages yet. Send the DCS team a note about this job.
           </p>
         )}
@@ -107,11 +107,11 @@ export function MessageThread({
                   className={`rounded-2xl px-3.5 py-2 text-sm ${
                     mine
                       ? "rounded-br-md bg-brand-navy text-white"
-                      : "rounded-bl-md bg-white text-brand-ink shadow-sm ring-1 ring-slate-200"
+                      : "rounded-bl-md bg-white text-brand-ink shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700"
                   }`}
                   data-testid="message-bubble"
                 >
-                  {!mine && <p className="mb-0.5 text-[11px] font-semibold text-brand-navy">{m.authorName}</p>}
+                  {!mine && <p className="mb-0.5 text-[11px] font-semibold text-brand-navy dark:text-blue-300">{m.authorName}</p>}
                   {m.body && <p className="whitespace-pre-wrap">{m.body}</p>}
                   {m.attachments.length > 0 && (
                     <div className="mt-1.5 grid grid-cols-2 gap-1.5">
@@ -127,19 +127,19 @@ export function MessageThread({
                     </div>
                   )}
                 </div>
-                <p className={`mt-0.5 px-1 text-[10px] text-slate-400 ${mine ? "text-right" : ""}`}>
+                <p className={`mt-0.5 px-1 text-[10px] text-slate-400 dark:text-slate-500 ${mine ? "text-right" : ""}`}>
                   {timeLabel(m.createdAt)}
                 </p>
               </div>
             </div>
           );
         })}
-        {lastOwnRead && <p className="pr-1 text-right text-[10px] text-slate-400">Read</p>}
+        {lastOwnRead && <p className="pr-1 text-right text-[10px] text-slate-400 dark:text-slate-500">Read</p>}
         <div ref={bottomRef} />
       </div>
 
       {/* Composer */}
-      <div className="sticky bottom-0 border-t border-slate-200 bg-white px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <div className="sticky bottom-0 border-t border-slate-200 bg-white px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] dark:border-slate-800 dark:bg-slate-900">
         {showUploader && (
           <div className="mb-2" key={uploaderKey}>
             <PhotoUploader max={maxPhotos} maxMb={maxMb} onChange={setAttachments} />
@@ -155,7 +155,7 @@ export function MessageThread({
             type="button"
             onClick={() => setShowUploader((s) => !s)}
             aria-label="Add photo"
-            className={`flex-none rounded-full p-2 ${showUploader ? "bg-brand-navy text-white" : "text-brand-navy"}`}
+            className={`flex-none rounded-full p-2 ${showUploader ? "bg-brand-navy text-white" : "text-brand-navy dark:text-blue-300"}`}
             data-testid="message-attach"
           >
             <ImagePlus className="h-5 w-5" aria-hidden />
@@ -166,7 +166,7 @@ export function MessageThread({
             rows={1}
             placeholder="Message the DCS team…"
             data-testid="message-input"
-            className="max-h-32 flex-1 resize-none rounded-2xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-brand-navy"
+            className="max-h-32 flex-1 resize-none rounded-2xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-brand-navy dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-400"
           />
           <button
             type="button"

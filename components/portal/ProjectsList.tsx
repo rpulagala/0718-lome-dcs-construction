@@ -16,29 +16,29 @@ function Row({ row }: { row: PortalRequestRow }) {
   return (
     <Link
       href={`/app/projects/${row.id}`}
-      className="flex items-center gap-3 px-4 py-3 transition-colors active:bg-slate-100"
+      className="flex items-center gap-3 px-4 py-3 transition-colors active:bg-slate-100 dark:active:bg-slate-800"
       data-testid="request-row"
     >
-      <div className="h-14 w-14 flex-none overflow-hidden rounded-xl bg-slate-100">
+      <div className="h-14 w-14 flex-none overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
         {row.thumbUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={row.thumbUrl} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-slate-300">
+          <div className="flex h-full w-full items-center justify-center text-slate-300 dark:text-slate-600">
             <ImageOff className="h-5 w-5" aria-hidden />
           </div>
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-brand-ink">{row.title}</p>
-        <p className="truncate text-xs text-slate-400">
+        <p className="truncate text-sm font-semibold text-brand-ink dark:text-slate-100">{row.title}</p>
+        <p className="truncate text-xs text-slate-400 dark:text-slate-500">
           {row.requestNumber} · Updated {formatDate(row.updatedAt)}
         </p>
         <div className="mt-1">
           <StatusPill status={row.customerStatus} />
         </div>
       </div>
-      <ChevronRight className="h-5 w-5 flex-none text-slate-300" aria-hidden />
+      <ChevronRight className="h-5 w-5 flex-none text-slate-300 dark:text-slate-600" aria-hidden />
     </Link>
   );
 }
@@ -56,7 +56,7 @@ export function ProjectsList({
   return (
     <div className="px-5">
       {/* iOS-style segmented control */}
-      <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-slate-200/70 p-1" role="tablist">
+      <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-slate-200/70 p-1 dark:bg-slate-800" role="tablist">
         {(["active", "completed"] as const).map((seg) => (
           <button
             key={seg}
@@ -64,8 +64,8 @@ export function ProjectsList({
             role="tab"
             aria-selected={segment === seg}
             onClick={() => setSegment(seg)}
-            className={`rounded-lg py-1.5 text-sm font-medium capitalize transition-colors ${
-              segment === seg ? "bg-white text-brand-ink shadow-sm" : "text-slate-500"
+            className={`rounded-lg py-1.5 text-sm font-medium capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-navy ${
+              segment === seg ? "bg-white text-brand-ink shadow-sm dark:bg-slate-700 dark:text-slate-100" : "text-slate-500 dark:text-slate-400"
             }`}
             data-testid={`segment-${seg}`}
           >
@@ -75,13 +75,13 @@ export function ProjectsList({
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
           {segment === "active"
             ? "No active work right now."
             : "Nothing completed yet."}
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900">
           {rows.map((row) => (
             <Row key={row.id} row={row} />
           ))}
