@@ -26,6 +26,8 @@ export type AuditAction =
   | "estimate.update"
   | "estimate.status_change"
   | "estimate.revise"
+  | "estimate.customer_accept"
+  | "estimate.customer_decline"
   | "project.create"
   | "project.update"
   | "project.status_change"

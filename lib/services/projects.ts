@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
-import type { ProjectStatus } from "@/lib/generated/prisma/enums";
+import type { Prisma } from "@/lib/generated/prisma/client";
+import type { ProjectStatus, RequestStatus } from "@/lib/generated/prisma/enums";
 import { canTransitionProject, requestStatusForProject } from "@/lib/domain/projectStatus";
 import {
   projectSchema,
@@ -31,6 +32,65 @@ function dateOnly(value: string | undefined): Date | null {
   if (!value) return null;
   const d = new Date(`${value}T00:00:00.000Z`);
   return Number.isNaN(d.getTime()) ? null : d;
+}
+
+export interface ProjectFromEstimateFields {
+  name: string;
+  contractAmount: string | null;
+  projectManagerId?: string | null;
+  plannedStartDate?: Date | null;
+  plannedEndDate?: Date | null;
+  internalNotes?: string | null;
+}
+
+/**
+ * Transaction-aware core of estimate→project conversion, shared by the staff
+ * flow (`createProjectFromEstimate`) and the customer accept flow
+ * (`respondToPortalEstimate`). Creates the project, writes a customer-visible
+ * PROJECT_CREATED activity, advances the request to PROJECT_SCHEDULED, and audits.
+ * The caller is responsible for validating that `estimateId` is ACCEPTED and the
+ * request has no project yet; `wr.status` must be current within the tx.
+ * `actorId` is a staff user id, or null for a customer-initiated conversion.
+ */
+export async function createProjectFromEstimateTx(
+  tx: Prisma.TransactionClient,
+  args: {
+    actorId: string | null;
+    estimateId: string;
+    wr: { id: string; status: RequestStatus; customerId: string; addressId: string | null };
+    fields: ProjectFromEstimateFields;
+  },
+): Promise<string> {
+  const { actorId, estimateId, wr, fields } = args;
+  const p = await tx.project.create({
+    data: {
+      name: fields.name,
+      workRequestId: wr.id,
+      estimateId,
+      customerId: wr.customerId,
+      addressId: wr.addressId,
+      projectManagerId: fields.projectManagerId ?? null,
+      status: "PLANNED",
+      contractAmount: fields.contractAmount,
+      plannedStartDate: fields.plannedStartDate ?? null,
+      plannedEndDate: fields.plannedEndDate ?? null,
+      internalNotes: fields.internalNotes ?? null,
+    },
+  });
+  await tx.workRequestActivity.create({
+    data: {
+      workRequestId: wr.id,
+      type: "PROJECT_CREATED",
+      summary: `Project "${fields.name}" created`,
+      isCustomerVisible: true,
+    },
+  });
+  await advanceRequestStatusTx(tx, wr, "PROJECT_SCHEDULED", actorId, "Project created");
+  await recordAudit(
+    { actorId, action: "project.create", entityType: "Project", entityId: p.id, metadata: { name: fields.name } },
+    tx,
+  );
+  return p.id;
 }
 
 /**
@@ -70,39 +130,23 @@ export async function createProjectFromEstimate(
   const wr = estimate.workRequest;
   const contractAmount = money(parsed.contractAmount) ?? (estimate.amount ? estimate.amount.toString() : null);
 
-  const project = await prisma.$transaction(async (tx) => {
-    const p = await tx.project.create({
-      data: {
+  const projectId = await prisma.$transaction((tx) =>
+    createProjectFromEstimateTx(tx, {
+      actorId,
+      estimateId: estimate.id,
+      wr,
+      fields: {
         name: parsed.name,
-        workRequestId: wr.id,
-        estimateId: estimate.id,
-        customerId: wr.customerId,
-        addressId: wr.addressId,
-        projectManagerId: text(parsed.projectManagerId),
-        status: "PLANNED",
         contractAmount,
+        projectManagerId: text(parsed.projectManagerId),
         plannedStartDate: dateOnly(parsed.plannedStartDate),
         plannedEndDate: dateOnly(parsed.plannedEndDate),
         internalNotes: text(parsed.internalNotes),
       },
-    });
-    await tx.workRequestActivity.create({
-      data: {
-        workRequestId: wr.id,
-        type: "PROJECT_CREATED",
-        summary: `Project "${parsed.name}" created`,
-        isCustomerVisible: true,
-      },
-    });
-    await advanceRequestStatusTx(tx, wr, "PROJECT_SCHEDULED", actorId, "Project created");
-    await recordAudit(
-      { actorId, action: "project.create", entityType: "Project", entityId: p.id, metadata: { name: parsed.name } },
-      tx,
-    );
-    return p;
-  });
+    }),
+  );
 
-  return { ok: true, projectId: project.id };
+  return { ok: true, projectId };
 }
 
 /** Edit a project's core fields (name, PM, dates, contract amount, notes). */

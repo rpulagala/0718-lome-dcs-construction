@@ -6,6 +6,7 @@ import { getPortalRequestDetail, type PortalProject } from "@/lib/services/porta
 import { formatInCompanyTz } from "@/lib/utils";
 import { StatusPill } from "@/components/portal/StatusPill";
 import { PortalGallery } from "@/components/portal/PortalGallery";
+import { EstimateActions } from "@/components/portal/EstimateActions";
 
 function fmtDate(d: Date | null): string {
   return d ? formatInCompanyTz(d, { dateStyle: "medium" }) : "—";
@@ -206,12 +207,12 @@ export default async function PortalRequestDetail({
                   {e.customerNotes && (
                     <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{e.customerNotes}</p>
                   )}
+                  {e.canRespond && (
+                    <EstimateActions estimateId={e.id} amountLabel={e.amountLabel} />
+                  )}
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-xs text-slate-400">
-              Accepting or declining an estimate in the app is coming soon.
-            </p>
           </Section>
         )}
 

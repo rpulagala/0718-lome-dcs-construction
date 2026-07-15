@@ -153,6 +153,8 @@ export interface PortalEstimate {
   customerNotes: string | null;
   sentAt: Date | null;
   expiresAt: Date | null;
+  /** True when the customer can still accept/decline (SENT and not past expiry). */
+  canRespond: boolean;
 }
 
 export interface PortalSiteVisit {
@@ -337,6 +339,7 @@ export async function getPortalRequestDetail(
       customerNotes: e.customerNotes,
       sentAt: e.sentAt,
       expiresAt: e.expiresAt,
+      canRespond: e.status === "SENT" && (e.expiresAt == null || e.expiresAt.getTime() >= Date.now()),
     })),
     project,
   };

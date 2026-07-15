@@ -16,7 +16,7 @@ export async function advanceRequestStatusTx(
   tx: Tx,
   wr: { id: string; status: RequestStatus },
   toStatus: RequestStatus,
-  actorId: string,
+  actorId: string | null,
   reason?: string,
   activityType: ActivityType = "STATUS_CHANGED",
 ): Promise<boolean> {
