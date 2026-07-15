@@ -35,6 +35,7 @@ export function SiteHeader() {
           </div>
           <nav className="flex items-center justify-end gap-6">
             <Link href="/request" className={navLink}>Contact</Link>
+            <Link href="/app" className={navLink}>Customer iPhone App</Link>
             <Link href="/signin" className={navLink}>Staff</Link>
           </nav>
         </div>
