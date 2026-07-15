@@ -108,6 +108,11 @@ const PLACEHOLDER_PNG = Buffer.from(
 );
 
 async function wipeTransactionalData() {
+  // Client-portal messages reference work requests — clear them first so the
+  // work-request wipe below doesn't hit a foreign-key constraint. (Portal
+  // accounts persist and are upserted; only the per-request threads are rebuilt.)
+  await prisma.clientMessageAttachment.deleteMany();
+  await prisma.clientMessage.deleteMany();
   await prisma.projectMilestone.deleteMany();
   await prisma.project.deleteMany();
   await prisma.estimate.deleteMany();
@@ -362,6 +367,11 @@ async function main() {
   ];
 
   let estSeq = 100; // showcase estimate numbers, clear of the seeded range
+  // Captured from the first showcase job (Eleanor Whitfield) to hang the
+  // customer-app demo extras (portal account, message thread, 2nd request) off.
+  let eleanorCtx: {
+    customerId: string; addressId: string; requestId: string; pmId: string; empBId: string;
+  } | null = null;
   for (const [idx, sc] of showcaseConfigs.entries()) {
     const d = (n: number) => daysAgo(sc.createdDaysAgo - n); // n days after intake
     const category = categories.find((c) => c.name === sc.categoryName) ?? categories[0];
@@ -523,11 +533,93 @@ async function main() {
         },
       },
     });
+
+    if (idx === 0) {
+      eleanorCtx = { customerId: customer.id, addressId: address.id, requestId: wr.id, pmId: pm.id, empBId: empB.id };
+    }
   }
 
-  // Advance counters past the showcase allocations (requests 27–28, estimates 100+).
+  // ── Customer-app demo extras for Eleanor Whitfield ────────────────────────
+  // A portal account (so she can sign in and see everything account-scoped), a
+  // two-way message thread on the kitchen project, and a SECOND request that is
+  // still in process at ESTIMATE_SENT with a live SENT estimate — so the in-app
+  // accept/decline flow is demoable (accepting it converts to a project).
+  if (eleanorCtx) {
+    const { customerId, addressId, requestId, pmId, empBId } = eleanorCtx;
+    const account = await prisma.customerAccount.upsert({
+      where: { email: "eleanor.w@example.com" },
+      update: { name: "Eleanor Whitfield", phone: "415-555-0301" },
+      create: { email: "eleanor.w@example.com", name: "Eleanor Whitfield", phone: "415-555-0301" },
+    });
+    // Link her existing kitchen request to the portal account.
+    await prisma.workRequest.update({ where: { id: requestId }, data: { customerAccountId: account.id } });
+
+    // Two-way message thread on the kitchen project (last customer message unread by staff).
+    await prisma.clientMessage.create({
+      data: { workRequestId: requestId, senderType: "CUSTOMER", authorAccountId: account.id, body: "Hi! Could we go over the tile options before the finishes milestone?", createdAt: daysAgo(6), readAt: daysAgo(5) },
+    });
+    await prisma.clientMessage.create({
+      data: { workRequestId: requestId, senderType: "STAFF", authorUserId: pmId, body: "Absolutely — I'll bring three samples to the on-site progress visit. All within your finish allowance.", createdAt: daysAgo(5), readAt: daysAgo(5) },
+    });
+    await prisma.clientMessage.create({
+      data: { workRequestId: requestId, senderType: "CUSTOMER", authorAccountId: account.id, body: "Perfect, thank you! One more thing — can we add under-cabinet lighting?", createdAt: daysAgo(1), readAt: null },
+    });
+
+    // Second request: a guest-bathroom refresh, in process at ESTIMATE_SENT.
+    const bathCategory = categories.find((c) => c.name === "Bathroom Remodel") ?? categories[0];
+    const created2 = daysAgo(12);
+    const req2 = await prisma.workRequest.create({
+      data: {
+        requestNumber: formatRequestNumber(YEAR, 29),
+        customerId, addressId, customerAccountId: account.id,
+        categoryId: bathCategory.id, categoryNameSnapshot: bathCategory.name,
+        description: "Guest bathroom refresh: replace the vanity, retile the shower surround, and update lighting.",
+        budgetRange: "$15k–$25k", desiredTimeframe: "Within 2 months",
+        referralSource: "Customer app", preferredContact: "EMAIL",
+        permissionToContact: true, consentAccepted: true,
+        status: "ESTIMATE_SENT", priority: "NORMAL",
+        assignedToId: empBId, firstContactedAt: daysAgo(11),
+        responseDueAt: addBusinessHours(created2, 48), createdAt: created2,
+        notes: {
+          create: [
+            { authorId: pmId, body: "Estimate sent — awaiting the customer's go-ahead in the app.", visibility: "CUSTOMER_VISIBLE", createdAt: daysAgo(4) },
+          ],
+        },
+        statusHistory: {
+          create: [
+            { toStatus: "NEW", createdAt: created2 },
+            { fromStatus: "NEW", toStatus: "REVIEWING", changedById: pmId, createdAt: daysAgo(11) },
+            { fromStatus: "REVIEWING", toStatus: "SITE_VISIT_TO_SCHEDULE", changedById: pmId, createdAt: daysAgo(10) },
+            { fromStatus: "SITE_VISIT_TO_SCHEDULE", toStatus: "SITE_VISIT_SCHEDULED", changedById: pmId, createdAt: daysAgo(9) },
+            { fromStatus: "SITE_VISIT_SCHEDULED", toStatus: "SITE_VISIT_COMPLETED", changedById: pmId, createdAt: daysAgo(7) },
+            { fromStatus: "SITE_VISIT_COMPLETED", toStatus: "ESTIMATE_IN_PROGRESS", changedById: pmId, createdAt: daysAgo(6) },
+            { fromStatus: "ESTIMATE_IN_PROGRESS", toStatus: "ESTIMATE_SENT", changedById: pmId, createdAt: daysAgo(4) },
+          ],
+        },
+        activities: {
+          create: [
+            { type: "SUBMITTED", summary: "Request submitted by customer", isCustomerVisible: true, createdAt: created2 },
+            { type: "SITE_VISIT_UPDATED", summary: "Site visit completed", isCustomerVisible: true, createdAt: daysAgo(7) },
+            { type: "ESTIMATE_SENT", summary: "Estimate sent to customer", isCustomerVisible: true, createdAt: daysAgo(4) },
+          ],
+        },
+      },
+    });
+    // The live SENT estimate she can accept or decline from the app.
+    await prisma.estimate.create({
+      data: {
+        estimateNumber: formatEstimateNumber(YEAR, estSeq++),
+        workRequestId: req2.id, status: "SENT",
+        description: "Guest bathroom refresh — vanity, tile, fixtures, and lighting.",
+        amount: "18500.00", sentAt: daysAgo(4), expiresAt: daysAgo(-21), createdById: pmId,
+        customerNotes: "Includes demolition, materials, fixtures, and cleanup. Valid for 30 days.",
+      },
+    });
+  }
+
+  // Advance counters past the showcase allocations (requests 27–29, estimates 100+).
   await prisma.requestCounter.upsert({
-    where: { year: YEAR }, update: { lastValue: 28 }, create: { year: YEAR, lastValue: 28 },
+    where: { year: YEAR }, update: { lastValue: 29 }, create: { year: YEAR, lastValue: 29 },
   });
   await prisma.estimateCounter.upsert({
     where: { year: YEAR }, update: { lastValue: estSeq }, create: { year: YEAR, lastValue: estSeq },
