@@ -15,6 +15,8 @@ import {
   completeSiteVisit,
 } from "@/lib/services/scheduling";
 import { logCommunication, createTask, toggleTask } from "@/lib/services/communication";
+import { sendStaffMessage, markThreadReadByStaff } from "@/lib/services/messaging";
+import { staffMessageSchema } from "@/lib/validation/message";
 import {
   createEstimate,
   updateEstimate,
@@ -73,6 +75,24 @@ export async function addNoteAction(
   const res = await addNote(user.id, requestId, body, visibility as NoteVisibility);
   revalidatePath(`/requests/${requestId}`);
   return res;
+}
+
+export async function sendClientMessageAction(requestId: string, body: string) {
+  const user = await requireCan("request:message");
+  const parsed = staffMessageSchema.safeParse({ body });
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Message can't be empty" };
+  }
+  await sendStaffMessage(user.id, requestId, parsed.data);
+  revalidatePath(`/requests/${requestId}`);
+  return { ok: true };
+}
+
+export async function markClientMessagesReadAction(requestId: string) {
+  await requireCan("request:message");
+  const count = await markThreadReadByStaff(requestId);
+  if (count > 0) revalidatePath(`/requests/${requestId}`);
+  return { ok: true, count };
 }
 
 export async function scheduleVisitAction(requestId: string, form: unknown) {

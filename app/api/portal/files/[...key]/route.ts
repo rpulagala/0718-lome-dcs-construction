@@ -21,14 +21,24 @@ export async function GET(
   const { key } = await ctx.params;
   const locator = key.map((k) => decodeURIComponent(k)).join("/");
 
-  // Ownership check: the photo's storageKey must be on a request owned by the
-  // signed-in account. A key the customer doesn't own is indistinguishable from
-  // one that doesn't exist (404).
-  const owned = await prisma.workRequestPhoto.findFirst({
-    where: { storageKey: locator, workRequest: { customerAccountId: session.sub } },
-    select: { id: true },
-  });
-  if (!owned) return new NextResponse("Not found", { status: 404 });
+  // Ownership check: the storageKey must belong to the signed-in account —
+  // either a request photo or a message attachment on one of the account's
+  // requests. A key the customer doesn't own is indistinguishable from one that
+  // doesn't exist (404).
+  const [ownedPhoto, ownedAttachment] = await Promise.all([
+    prisma.workRequestPhoto.findFirst({
+      where: { storageKey: locator, workRequest: { customerAccountId: session.sub } },
+      select: { id: true },
+    }),
+    prisma.clientMessageAttachment.findFirst({
+      where: {
+        storageKey: locator,
+        message: { workRequest: { customerAccountId: session.sub } },
+      },
+      select: { id: true },
+    }),
+  ]);
+  if (!ownedPhoto && !ownedAttachment) return new NextResponse("Not found", { status: 404 });
 
   const obj = await readObject(locator);
   if (!obj) return new NextResponse("Not found", { status: 404 });

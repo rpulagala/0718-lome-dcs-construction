@@ -83,6 +83,11 @@ enum ProjectStatus {
   CANCELLED
 }
 
+enum MessageSenderType {
+  CUSTOMER
+  STAFF
+}
+
 enum EmailStatus {
   QUEUED
   SENT
@@ -129,6 +134,7 @@ model User {
   auditLogs           AuditLog[]
   estimates           Estimate[]
   managedProjects     Project[]
+  clientMessages      ClientMessage[]
 
   @@index([role])
   @@index([isActive])
@@ -237,6 +243,7 @@ model WorkRequest {
   accessTokens      CustomerAccessToken[]
   notifications     Notification[]
   project           Project?
+  clientMessages    ClientMessage[]
 
   @@index([status])
   @@index([assignedToId])
@@ -523,9 +530,44 @@ model CustomerAccount {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  workRequests WorkRequest[]
+  workRequests   WorkRequest[]
+  clientMessages ClientMessage[]
 
   @@index([email])
+}
+
+// A two-way message thread between a customer and DCS staff, scoped to one work
+// request. Staff see these in the console alongside the Communication log.
+model ClientMessage {
+  id              String            @id @default(uuid())
+  workRequestId   String
+  workRequest     WorkRequest       @relation(fields: [workRequestId], references: [id])
+  senderType      MessageSenderType
+  authorAccountId String?
+  authorAccount   CustomerAccount?  @relation(fields: [authorAccountId], references: [id])
+  authorUserId    String?
+  authorUser      User?             @relation(fields: [authorUserId], references: [id])
+  body            String
+  readAt          DateTime?
+  createdAt       DateTime          @default(now())
+
+  attachments ClientMessageAttachment[]
+
+  @@index([workRequestId, createdAt])
+  @@index([readAt])
+}
+
+model ClientMessageAttachment {
+  id          String        @id @default(uuid())
+  messageId   String
+  message     ClientMessage @relation(fields: [messageId], references: [id])
+  storageKey  String
+  fileName    String
+  contentType String
+  sizeBytes   Int
+  createdAt   DateTime      @default(now())
+
+  @@index([messageId])
 }
 
 // Passwordless one-time login codes for the client app (hashed, short-lived).

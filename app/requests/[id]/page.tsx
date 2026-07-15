@@ -9,10 +9,12 @@ import { NoteForm } from "@/components/requests/NoteForm";
 import { InternalGallery } from "@/components/requests/InternalGallery";
 import { SchedulePanel } from "@/components/requests/SchedulePanel";
 import { CommunicationForm } from "@/components/requests/CommunicationForm";
+import { ClientMessagesPanel } from "@/components/requests/ClientMessagesPanel";
 import { TaskList } from "@/components/requests/TaskList";
 import { EstimatesPanel } from "@/components/requests/EstimatesPanel";
 import { ProjectPanel } from "@/components/requests/ProjectPanel";
 import { getRequestDetail, assignableUsers, managerCandidates } from "@/lib/services/requestQueries";
+import { getStaffThread, staffUnreadCount } from "@/lib/services/messaging";
 import { allowedTransitions } from "@/lib/domain/statusMachine";
 import {
   allowedEstimateTransitions,
@@ -97,6 +99,11 @@ export default async function RequestDetailPage({
   const canEstimate = can(user.role, "estimate:manage");
   const canProject = can(user.role, "project:manage");
   const managers = canProject || canEstimate ? await managerCandidates() : [];
+
+  const [clientMessages, clientUnread] = await Promise.all([
+    getStaffThread(r.id),
+    staffUnreadCount(r.id),
+  ]);
 
   const estimates = r.estimates.map((e) => ({
     id: e.id,
@@ -287,6 +294,17 @@ export default async function RequestDetailPage({
                     ))}
                   </ul>
                 )}
+              </div>
+            </section>
+
+            {/* Client app messages — two-way thread with the customer */}
+            <section className={`rounded-lg border ${sectionTone.blue}`}>
+              <div className="p-4">
+                <ClientMessagesPanel
+                  requestId={r.id}
+                  messages={clientMessages}
+                  unread={clientUnread}
+                />
               </div>
             </section>
 

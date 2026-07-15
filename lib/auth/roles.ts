@@ -27,6 +27,7 @@ export const isAdmin = (r: UserRole | undefined | null) =>
 export type Action =
   | "request:view"
   | "request:note"
+  | "request:message"
   | "request:status"
   | "request:schedule"
   | "request:assign"
@@ -43,6 +44,7 @@ export type Action =
 const MIN_ROLE: Record<Action, UserRole> = {
   "request:view": "EMPLOYEE",
   "request:note": "EMPLOYEE",
+  "request:message": "EMPLOYEE",
   "request:status": "EMPLOYEE",
   "request:schedule": "EMPLOYEE",
   "request:assign": "MANAGER",

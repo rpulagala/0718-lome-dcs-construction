@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, MapPin, Calendar, FileText, CheckCircle2, Circle } from "lucide-react";
+import { ChevronLeft, MapPin, Calendar, FileText, CheckCircle2, Circle, MessageCircle } from "lucide-react";
 import { requirePortalUser } from "@/lib/portal/session";
 import { getPortalRequestDetail, type PortalProject } from "@/lib/services/portalData";
 import { formatInCompanyTz } from "@/lib/utils";
@@ -153,6 +153,14 @@ export default async function PortalRequestDetail({
           <span className="text-xs text-slate-400">{detail.requestNumber}</span>
         </div>
         <p className="mt-1 text-xs text-slate-400">Submitted {fmtDate(detail.submittedAt)}</p>
+        <Link
+          href={`/app/messages/${detail.id}`}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand-navy px-4 py-2 text-sm font-semibold text-white"
+          data-testid="message-team"
+        >
+          <MessageCircle className="h-4 w-4" aria-hidden />
+          Message the team
+        </Link>
       </div>
 
       <div className="mt-5 space-y-4 px-5">
