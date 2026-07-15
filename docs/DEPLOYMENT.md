@@ -16,7 +16,7 @@ Production-ready MVP. Target platform: **Vercel** (Next.js App Router) with a ma
 > ⚠️ Production currently contains demo staff accounts (`@dcs.example`, password `Password123!`) from the seed — deactivate them via **Admin → Users** before real-world use.
 
 ### Client app (customer portal) — not yet deployed
-The `/app` customer portal (C0/C1 foundation) runs **locally only**. Its migration (`client_portal_accounts`) is already part of `prisma migrate deploy`, so deploying the current `main` would create the tables in production without exposing the portal beyond the `/app` routes. Before deploying the portal for real customers: verify passwordless email actually sends (**Resend key + verified domain** — currently log-mode), and complete the **data-isolation/IDOR test gate** (C7). See [CLIENT_APP_PLAN.md](CLIENT_APP_PLAN.md).
+The `/app` customer portal (C0/C1 foundation) runs **locally only**. Its migration (`client_portal_accounts`) is already part of `prisma migrate deploy`, so deploying the current `main` would create the tables in production without exposing the portal beyond the `/app` routes. Before deploying the portal for real customers: wire real passwordless email delivery (**Resend key + verified domain** — currently log-mode; this is deferred to **C8**), and complete the **data-isolation/IDOR test gate** (C7). See [CLIENT_APP_PLAN.md](CLIENT_APP_PLAN.md).
 
 ## 1. Prerequisites
 - Node.js 20+ and npm.
