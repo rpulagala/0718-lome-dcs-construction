@@ -1,6 +1,6 @@
 # DCS Construction — Client App (Customer Portal) · Project Plan
 
-> **Status (2026-07-14):** **C0 + C1 + C2 + C3 + C4 + C5 complete** (foundation + Home/Projects tracking + in-app request creation + two-way messaging + in-app estimate accept/decline shipped, verified locally). C6 onward pending.
+> **Status (2026-07-15):** **C0–C7 complete** (foundation + Home/Projects tracking + in-app request creation + two-way messaging + estimate accept/decline + PWA/dark-mode/a11y polish + data-isolation/E2E hardening, verified locally). Only **C8 — Email & notifications** remains (real mail provider; the demo runs on on-screen login codes).
 > **Companion to:** the existing staff console + intake system (live at https://0718-lome-dcs-construction.vercel.app). This app reuses the **same database, services, and brand**.
 > **Plan date:** 2026-07-14
 >
@@ -39,6 +39,19 @@
 > - **Shared info was already surfaced in C2** (sent estimates, customer-visible notes, scheduled site visits) — C5 adds the **action** on top. The read layer ([lib/services/portalData.ts](../lib/services/portalData.ts)) now returns `canRespond` per estimate (`SENT` and not expired) so the UI knows when to offer buttons.
 > - **UI:** the estimate card on the request detail ([app/app/projects/[id]/page.tsx](../app/app/projects/%5Bid%5D/page.tsx)) replaces the old "coming soon" note with **Accept / Decline** controls ([components/portal/EstimateActions.tsx](../components/portal/EstimateActions.tsx)) — a two-step confirm ("Accepting starts your project"), pending state, and `router.refresh()` on success. Session-guarded, rate-limited action in [app/app/projects/[id]/actions.ts](../app/app/projects/%5Bid%5D/actions.ts). **One source of truth** — the estimate/request/project state changes appear immediately in the staff console. **Documents/PDF surfacing deferred** (later polish); email notifications on the decision are deferred to **C8**.
 > - **Verified:** lint + typecheck clean; **151 tests** (6 new: accept creates a project + advances the request, decline, **IDOR** negative leaves state untouched, and guards for non-`SENT`/expired/already-has-a-project); `next build` green; browser walkthrough on a 375×812 viewport signed in as a portal customer — opened a request with a SENT estimate, **Accepted** it, and confirmed the request flipped to **Project Scheduled** with a **Project** card (contract carried from the estimate) and the estimate now reading **Accepted**; DB-confirmed `estimate ACCEPTED` / `request PROJECT_SCHEDULED` / project created / `estimate.customer_accept` audited (then removed the throwaway data).
+>
+> ### ✅ Phase C6 — PWA & polish (done, verified locally)
+> - **Dark mode (portal-scoped):** a `dark` class is applied to an `/app`-only wrapper ([components/portal/PortalTheme.tsx](../components/portal/PortalTheme.tsx), `useSyncExternalStore` over localStorage with an OS `prefers-color-scheme` default) so dark mode never bleeds into the staff console or public site. A Light/Dark toggle sits on Profile; `dark:` variants were added across every portal screen (the light theme is byte-for-byte unchanged — only variants were added).
+> - **Loading / error / empty states:** route-level `loading.tsx` skeletons for Home, Projects, request detail, Messages, and the thread (shared `Skeleton` components); an `app/app/error.tsx` boundary with a retry, and a portal `not-found.tsx`; the existing empty states got dark variants.
+> - **Accessibility:** tab bar `aria-current` + focus-visible rings, grouped/labelled controls, and a global `prefers-reduced-motion` rule that neutralizes animations/transitions.
+> - **Transitions & PWA:** subtle `active:scale` tap feedback on cards/buttons; the service worker bumped to `v2` with an inline offline fallback and the sign-in route added to the cached shell.
+> - **Verified:** lint + typecheck clean; **151 tests** still green; `next build` green; browser walkthrough (375×812) — light theme unchanged, dark mode rendered correctly across Home and the request detail (estimate Accept/Decline included), loading skeletons observed on navigation.
+>
+> ### ✅ Phase C7 — Testing & hardening (done, verified locally)
+> - **Consolidated data-isolation / IDOR suite** ([tests/integration/portalIsolation.test.ts](../tests/integration/portalIsolation.test.ts)) — the #1 security priority made exhaustive: an attacker account **B** is refused every read/write/state-change on a victim account **A** across `listPortalRequests`, `getPortalRequestDetail`, `getPortalThread`/`listPortalThreads`/`portalUnreadTotal`, `sendPortalMessage` + `markPortalThreadRead` (with no-write / no-state-change assertions), and `respondToPortalEstimate` (accept + decline), plus positive controls that A can reach its own.
+> - **Portal E2E journey** ([tests/e2e/portal.spec.ts](../tests/e2e/portal.spec.ts), 390×844) through the real UI — public intake → **passwordless portal sign-in via the on-screen demo code** → the auto-linked request under Projects → open its detail → an **IDOR → 404** negative on an unowned id.
+> - **Security review:** re-reviewed the portal surfaces (auth, per-account scoping, message/estimate authz, the customer-actor audit trail) — no new findings; see [SECURITY.md](SECURITY.md).
+> - **Verified:** **159 unit/integration tests** (8 new isolation) + **14 Playwright E2E** (3 new portal, run green against a live dev server); typecheck + lint clean; `next build` green.
 
 ---
 
@@ -172,8 +185,8 @@ Each phase ends with the same **gate** used on the main app: `lint → typecheck
 | **✅ C3 — Create a request** | In-app multi-step "New request" sheet (pre-filled) + photo upload; confirmation; appears in the staff console. | Sonnet |
 | **✅ C4 — Messaging** | Two-way `ClientMessage` threads, attachments, read state; staff see them in the console; near-real-time via refresh/polling. | Opus (message model/authz) → Sonnet (UI) |
 | **✅ C5 — Shared info & estimates** | Surface SENT estimates, customer-visible notes, scheduled visits, and documents; **view + accept/decline an estimate in-app** (updates the console; accept converts to a project), audited. | Opus (estimate authz) → Sonnet |
-| **C6 — PWA & polish** | PWA offline shell + installability; transitions, dark mode, accessibility (WCAG AA), empty/loading/error/skeleton states. _(Email notifications moved to C8.)_ | Sonnet + Haiku (polish) |
-| **C7 — Testing & hardening** | **Data-isolation/IDOR test suite**, E2E journeys (sign-in, create request, track, message), security review, perf, deploy. | Sonnet (tests) + Opus (security review) |
+| **✅ C6 — PWA & polish** | PWA offline shell + installability; transitions, dark mode, accessibility (WCAG AA), empty/loading/error/skeleton states. _(Email notifications moved to C8.)_ | Sonnet + Haiku (polish) |
+| **✅ C7 — Testing & hardening** | **Data-isolation/IDOR test suite**, E2E journeys (sign-in, create request, track, message), security review, perf, deploy. | Sonnet (tests) + Opus (security review) |
 | **C8 — Email & notifications** _(later)_ | Wire a real email provider (Resend + verified sending domain): deliver **real passwordless login codes** (retire the on-screen demo code) and request/estimate **confirmations**; **email notifications** on key events (new estimate, status change, new message, visit scheduled). Web push is a stretch. | Sonnet |
 
 *Routing mirrors the main project's cost strategy: start at the cheapest model that holds quality (Haiku → Sonnet → Opus), escalating only for schema/security/architecture.
