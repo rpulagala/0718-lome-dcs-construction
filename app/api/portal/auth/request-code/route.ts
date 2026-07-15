@@ -19,6 +19,10 @@ export async function POST(req: NextRequest) {
   const emailOk = rateLimit(`portal-code-email:${email}`, 4, 10 * 60 * 1000).ok;
 
   // Only actually send when under the limits; always report ok.
-  if (ipOk && emailOk) await requestLoginCode(email);
+  if (ipOk && emailOk) {
+    const res = await requestLoginCode(email);
+    // `devCode` is only present when no real email provider is wired (demo mode).
+    return NextResponse.json({ ok: true, devCode: res.devCode });
+  }
   return NextResponse.json({ ok: true });
 }

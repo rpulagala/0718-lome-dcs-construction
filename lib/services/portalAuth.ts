@@ -28,8 +28,15 @@ function genCode(): string {
  * Issue a one-time login code to `email`. Always resolves ok for a valid email
  * shape (never reveals whether an account exists). The code is emailed; only its
  * hash is stored.
+ *
+ * When no real email provider is wired (`EMAIL_MODE !== "resend"`, i.e. the code
+ * is only logged, never delivered), the plaintext code is returned as `devCode`
+ * so a demo instance is usable without email. This is intentionally NOT returned
+ * once real email is configured.
  */
-export async function requestLoginCode(rawEmail: string): Promise<{ ok: boolean }> {
+export async function requestLoginCode(
+  rawEmail: string,
+): Promise<{ ok: boolean; devCode?: string }> {
   const email = normEmail(rawEmail);
   if (!EMAIL_RE.test(email)) return { ok: false };
 
@@ -44,7 +51,9 @@ export async function requestLoginCode(rawEmail: string): Promise<{ ok: boolean 
   } catch (err) {
     logger.error("portal.code_email_failed", { error: String(err) });
   }
-  return { ok: true };
+
+  const emailDelivered = env.EMAIL_MODE === "resend" && Boolean(env.RESEND_API_KEY);
+  return emailDelivered ? { ok: true } : { ok: true, devCode: code };
 }
 
 export interface VerifyResult {

@@ -8,6 +8,7 @@ export default function PortalSignIn() {
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [devCode, setDevCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,9 +20,19 @@ export default function PortalSignIn() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ email }),
     });
+    const data = await res.json().catch(() => ({}));
     setBusy(false);
-    if (res.ok) setStep("code");
-    else setError("Please enter a valid email address.");
+    if (res.ok) {
+      setStep("code");
+      // Demo mode (no email provider wired): the code comes back so we can
+      // show + prefill it. Absent once real email is configured.
+      if (typeof data.devCode === "string") {
+        setDevCode(data.devCode);
+        setCode(data.devCode);
+      }
+    } else {
+      setError("Please enter a valid email address.");
+    }
   }
 
   async function verify() {
@@ -97,6 +108,15 @@ export default function PortalSignIn() {
           <p className="text-sm text-slate-600">
             Enter the 6-digit code we sent to <span className="font-medium text-slate-900">{email}</span>.
           </p>
+          {devCode && (
+            <p
+              className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700"
+              data-testid="portal-dev-code"
+            >
+              Demo mode (email not configured): your code is{" "}
+              <span className="font-semibold tracking-widest">{devCode}</span> — prefilled below.
+            </p>
+          )}
           <input
             type="text"
             inputMode="numeric"
@@ -114,7 +134,7 @@ export default function PortalSignIn() {
           </button>
           <button
             type="button"
-            onClick={() => { setStep("email"); setCode(""); setError(null); }}
+            onClick={() => { setStep("email"); setCode(""); setDevCode(null); setError(null); }}
             className="h-10 w-full text-sm font-medium text-slate-500"
           >
             ← Use a different email
