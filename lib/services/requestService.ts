@@ -58,6 +58,7 @@ async function findByIdempotencyKey(key: string) {
  */
 export async function createWorkRequest(
   input: WorkRequestInput,
+  opts: { customerAccountId?: string } = {},
 ): Promise<CreateResult> {
   // Idempotency: a repeated submission returns the original request.
   const existing = await findByIdempotencyKey(input.idempotencyKey);
@@ -104,6 +105,7 @@ export async function createWorkRequest(
         data: {
           requestNumber,
           customerId: customer.id,
+          customerAccountId: opts.customerAccountId ?? null,
           addressId: address.id,
           categoryId: category.id,
           categoryNameSnapshot: category.name,

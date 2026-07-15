@@ -32,7 +32,7 @@ export default async function PortalHome() {
 
         <div className="grid grid-cols-2 gap-3">
           <Link
-            href="/app/projects"
+            href="/app/projects/new"
             className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4"
           >
             <FilePlus2 className="h-6 w-6 text-brand-navy" aria-hidden />

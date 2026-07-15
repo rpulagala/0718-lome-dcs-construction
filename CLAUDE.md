@@ -1,6 +1,6 @@
 @AGENTS.md
 
-> **Status:** the phased build (Phases 0–7) is complete and the app is **live in production** on Vercel — https://0718-lome-dcs-construction.vercel.app. A second workstream, the **client app / customer portal** (iPhone-style PWA under `/app`), has **C0/C1/C2 built and verified locally** (customer accounts, passwordless auth, mobile app shell + PWA, and the account-scoped Home/Projects/request-detail tracking screens) — plan/status in [docs/CLIENT_APP_PLAN.md](docs/CLIENT_APP_PLAN.md); not deployed. Full context/status is in [AGENTS.md](AGENTS.md) (imported above) and [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md). The phase-completion protocol below applies whenever a substantial chunk of work lands.
+> **Status:** the phased build (Phases 0–7) is complete and the app is **live in production** on Vercel — https://0718-lome-dcs-construction.vercel.app. A second workstream, the **client app / customer portal** (iPhone-style PWA under `/app`), has **C0/C1/C2/C3 built and verified locally** (customer accounts, passwordless auth, mobile app shell + PWA, the account-scoped Home/Projects/request-detail tracking screens, and in-app "New request" creation) — plan/status in [docs/CLIENT_APP_PLAN.md](docs/CLIENT_APP_PLAN.md); not deployed. Full context/status is in [AGENTS.md](AGENTS.md) (imported above) and [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md). The phase-completion protocol below applies whenever a substantial chunk of work lands.
 
 # Working agreement
 

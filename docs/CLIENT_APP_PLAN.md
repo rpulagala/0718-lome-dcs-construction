@@ -1,6 +1,6 @@
 # DCS Construction — Client App (Customer Portal) · Project Plan
 
-> **Status (2026-07-14):** **C0 + C1 + C2 complete** (foundation + Home/Projects tracking shipped, verified locally). C3 onward pending.
+> **Status (2026-07-14):** **C0 + C1 + C2 + C3 complete** (foundation + Home/Projects tracking + in-app request creation shipped, verified locally). C4 onward pending.
 > **Companion to:** the existing staff console + intake system (live at https://0718-lome-dcs-construction.vercel.app). This app reuses the **same database, services, and brand**.
 > **Plan date:** 2026-07-14
 >
@@ -20,6 +20,12 @@
 > - **Screens:** **Home** ([app/app/page.tsx](../app/app/page.tsx)) — greeting, active-count card, quick actions, active-work preview, recent-activity feed; **Projects** ([app/app/projects/page.tsx](../app/app/projects/page.tsx)) — iOS segmented Active/Completed list with photo thumbnails + `StatusPill`; **Request/Project detail** ([app/app/projects/[id]/page.tsx](../app/app/projects/[id]/page.tsx)) — customer status, project card (status, milestone progress bar, planned/actual dates, team lead, contract), full-screen photo gallery, details+address, sent estimates, site visits, updates timeline, team notes. New components in `components/portal/{StatusPill,ProjectsList,PortalGallery}.tsx`.
 > - **Photos:** portal-scoped, ownership-checked route [app/api/portal/files/[...key]/route.ts](../app/api/portal/files/%5B...key%5D/route.ts) (a photo streams only if its `storageKey` is on a request linked to the account; else 404) + isomorphic [lib/portal/photoSrc.ts](../lib/portal/photoSrc.ts) (remote blob URL used directly, local key via the guarded route).
 > - **Verified:** lint + typecheck clean; **136 tests** (7 new portal-data tests: list isolation, detail ownership/**IDOR** negative, Active/Completed bucketing, customer-visible-notes-only, sent-estimates-only); `next build` green; browser walkthrough on a 375×812 viewport signed in as the seeded Whitfield Kitchen customer (Home → Projects → detail with live milestones/estimates/site-visits) + confirmed another customer's request id returns **404**.
+>
+> ### ✅ Phase C3 — Create a request (done, verified locally)
+> - **In-app New Request flow:** a 3-step form ([components/portal/NewRequestForm.tsx](../components/portal/NewRequestForm.tsx)) at [/app/projects/new](../app/app/projects/new/page.tsx) — Project (category + description + optional budget/timeframe) → Contact & location → Photos & notes — with a step progress bar, per-step validation, and an in-flow **confirmation** ("Request sent!" + request number + View request / Back to projects). Reuses the existing [PhotoUploader](../components/request/PhotoUploader.tsx) (public `/api/upload`, magic-byte validated).
+> - **Prefill:** [getPortalPrefill](../lib/services/portalRequests.ts) fills name/phone/preferred-contact from the account and the address from the customer's most recent request, so a returning customer barely types.
+> - **Server path:** session-guarded, rate-limited action [submitPortalRequest](../app/app/projects/new/actions.ts) → [createPortalRequest](../lib/services/portalRequests.ts) → the shared [createWorkRequest](../lib/services/requestService.ts) (extended with an optional `customerAccountId`). The **account's canonical email** is used (never a client value) so the request links to the account; permission/consent are implicit for an authenticated submission; `referralSource` is stamped **"Customer app"**. The request is created with `customerAccountId` set, so it appears immediately in the customer's app **and** in the staff console (status NEW, confirmation + intake-alert emails fire as usual).
+> - **Verified:** lint + typecheck clean; **138 tests** (2 new: request is account-linked + visible in the portal list; canonical-email used); `next build` green; browser walkthrough on 375×812 as the Whitfield customer — stepped through the form (prefilled name/phone/address), submitted, landed on the confirmation, opened the new request's detail, and confirmed in the DB it's `customerAccountId`-linked with `referralSource="Customer app"` (then removed the throwaway request).
 
 ---
 
@@ -150,7 +156,7 @@ Each phase ends with the same **gate** used on the main app: `lint → typecheck
 | **✅ C0 — Discovery & design** | This plan + wireframes, the iOS design system, and the **data-model + auth decisions** locked. | Opus (schema/security/UX contracts) |
 | **✅ C1 — Foundation** | `CustomerAccount` + customer **auth** (passwordless), the **portal route group + mobile app shell** (tab bar, PWA manifest/service worker, theme, safe-area), account linking/backfill. | Opus (auth/schema) → Sonnet (shell) |
 | **✅ C2 — Home & Projects** | Home dashboard; Projects list (Active/Completed); **project detail** (status, milestones, progress, dates, team, photos); **request detail** (customer view). Strict scoping. | Sonnet |
-| **C3 — Create a request** | In-app multi-step "New request" sheet (pre-filled) + photo upload; confirmation; appears in the staff console. | Sonnet |
+| **✅ C3 — Create a request** | In-app multi-step "New request" sheet (pre-filled) + photo upload; confirmation; appears in the staff console. | Sonnet |
 | **C4 — Messaging** | Two-way `ClientMessage` threads, attachments, read state; staff see them in the console; near-real-time via refresh/polling. | Opus (message model/authz) → Sonnet (UI) |
 | **C5 — Shared info & estimates** | Surface SENT estimates, customer-visible notes, scheduled visits, and documents; **view + accept/decline an estimate in-app** (updates the console; accept converts to a project), audited. | Opus (estimate authz) → Sonnet |
 | **C6 — Notifications & polish** | Email notifications on key events; PWA offline shell + installability; transitions, dark mode, accessibility (WCAG AA), empty/loading/error states. | Sonnet + Haiku (polish) |
