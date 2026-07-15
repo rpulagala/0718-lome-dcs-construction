@@ -1,6 +1,6 @@
 # DCS Construction — Detailed Project Plan
 
-> **Build status — 2026-07-14:** Phases **0–7 complete and verified**, then **deployed to production** — **🟢 live at https://0718-lome-dcs-construction.vercel.app** (Vercel + Neon Postgres + Vercel Blob). **129 unit/integration tests + 11 Playwright E2E tests passing**, typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (8 users incl. the real admin, 14 categories, 5 settings, 28 work requests incl. 2 rich showcase jobs, photos, site visits, estimates, 4 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md); deployment details in [DEPLOYMENT.md](DEPLOYMENT.md).
+> **Build status — 2026-07-14:** Phases **0–7 complete and verified**, then **deployed to production** — **🟢 live at https://0718-lome-dcs-construction.vercel.app** (Vercel + Neon Postgres + Vercel Blob). **151 unit/integration tests + 11 Playwright E2E tests passing** (incl. the client-portal suites through C5), typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (8 users incl. the real admin, 14 categories, 5 settings, 28 work requests incl. 2 rich showcase jobs, photos, site visits, estimates, 4 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md); deployment details in [DEPLOYMENT.md](DEPLOYMENT.md).
 >
 > | Phase | State |
 > |---|---|

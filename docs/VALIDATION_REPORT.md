@@ -9,7 +9,7 @@
 |---|---|
 | `npm run lint` | ✅ clean |
 | `npm run typecheck` (`tsc --noEmit`) | ✅ clean |
-| `npm run test` (Vitest) | ✅ **129 passing** (10 unit + 6 integration files, incl. client-portal auth) |
+| `npm run test` (Vitest) | ✅ **151 passing** (incl. the client-portal suites through C5: auth, data-isolation/IDOR, request creation, messaging, and estimate accept/decline) |
 | `npm run test:e2e` (Playwright) | ✅ **11 passing** (4 spec files) |
 | `npm run build` (`next build`) | ✅ green (19 routes) |
 | `/api/health` (local + production) | ✅ `{status:ok, db:ok}` |
