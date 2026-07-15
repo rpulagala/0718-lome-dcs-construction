@@ -1,6 +1,6 @@
 # DCS Construction — Detailed Project Plan
 
-> **Build status — 2026-07-14:** Phases **0–7 complete and verified**, then **deployed to production** — **🟢 live at https://0718-lome-dcs-construction.vercel.app** (Vercel + Neon Postgres + Vercel Blob). **120 unit/integration tests + 11 Playwright E2E tests passing**, typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (8 users incl. the real admin, 14 categories, 5 settings, 28 work requests incl. 2 rich showcase jobs, photos, site visits, estimates, 4 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md); deployment details in [DEPLOYMENT.md](DEPLOYMENT.md).
+> **Build status — 2026-07-14:** Phases **0–7 complete and verified**, then **deployed to production** — **🟢 live at https://0718-lome-dcs-construction.vercel.app** (Vercel + Neon Postgres + Vercel Blob). **129 unit/integration tests + 11 Playwright E2E tests passing**, typecheck + lint clean, `next build` green. Local PostgreSQL runs via Docker on host port **5433**, migrated + seeded (8 users incl. the real admin, 14 categories, 5 settings, 28 work requests incl. 2 rich showcase jobs, photos, site visits, estimates, 4 projects). Dev login: `admin@dcs.example` / `Password123!`. Phase-by-phase progress is tracked below and in [DECISIONS.md](DECISIONS.md); deployment details in [DEPLOYMENT.md](DEPLOYMENT.md).
 >
 > | Phase | State |
 > |---|---|
@@ -13,6 +13,8 @@
 > | 6 — Estimates & projects | ✅ Complete & verified |
 > | 7 — Testing & hardening | ✅ Complete & verified |
 > | 8 — Deploy + branding/UX polish | ✅ Complete — live on Vercel |
+>
+> **Client app (customer portal)** — a separate iPhone-style PWA under `/app`, planned in [CLIENT_APP_PLAN.md](CLIENT_APP_PLAN.md). Phases **C0 (design) + C1 (foundation: CustomerAccount + passwordless auth + mobile app shell + PWA)** are **complete and verified locally** (129 tests, build green); **not deployed**. C2 (project/request tracking) onward pending.
 
 > Work intake & tracking web application (production-ready MVP)
 > Source of truth: `project_requirement.txt` (the build prompt) + `DCS Construction Site Map 3 (1).pdf` (original 3-year-old rough concept)

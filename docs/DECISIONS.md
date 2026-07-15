@@ -90,6 +90,13 @@ Format: decision — rationale. Assumptions are MVP defaults; revisit if the cli
 - **Brand system.** Source Sans 3 as `--font-brand` (default app-wide) approximates the client's Adobe Freight Sans; brand tokens `#024988` navy / `#cd0e0e` red / `#1c1c1c` ink in `globals.css`. **Public pages centered, internal pages left-aligned** (deliberate: marketing site vs. dense staff console). Request-detail sections are color-coded via `lib/ui/tone.ts` for scannability.
 - **Dashboard split from the request list.** `/dashboard` is an overview (stat cards + a Requests-vs-Projects explainer); `/requests` is the searchable list. `/requests` used to redirect to `/dashboard`.
 
+## Client app (C0/C1) notes
+- **Separate, self-contained portal session** rather than folding customers into staff Auth.js. The portal uses an HMAC-signed httpOnly cookie (`lib/portal/session.ts`, keyed on `AUTH_SECRET`, no new deps) so customer and staff auth never mix roles/sessions.
+- **Passwordless email one-time code** (locked decision): 6-digit, hashed at rest, single-use, 10-min expiry, attempt-capped, rate-limited; request-code never reveals whether an account exists.
+- **Canonical `CustomerAccount` + lazy linking.** Intake still creates a per-submission `Customer` (contact snapshot); the account is created on first sign-in and **claims that customer's existing requests by matching email** (`updateMany` after resolving customer ids, since relation filters aren't allowed in `updateMany`).
+- **Same app, new route group** (`app/app/`, `/app`) — reuses DB/services/brand; a phone-width shell + bottom tab bar + PWA (manifest scoped to `/app`, minimal service worker) gives the iPhone feel without a native build.
+- **Data isolation is the gating concern for C2+**: every customer-facing query must be scoped to `customerAccountId`, with a dedicated IDOR test suite before the portal is deployed.
+
 ## Open questions (non-blocking; proceeding with defaults)
 - Real project gallery content and brand assets (logo, colors) from client.
 - Exact service area boundaries.

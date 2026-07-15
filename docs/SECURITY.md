@@ -1,5 +1,7 @@
 # DCS Construction — Security & Privacy
 
+> **📱 Client app (2026-07-14, foundation):** the customer portal under `/app` uses a **separate passwordless auth** (email one-time code) with its own HMAC-signed httpOnly session cookie, distinct from the staff Auth.js session. Codes are 6-digit, hashed at rest (HMAC), single-use, 10-minute expiry, attempt-capped (5), and rate-limited per IP + per email; the request-code endpoint never reveals whether an account exists. Portal data access is scoped to the signed-in `customerAccountId`. **Data isolation is the top priority for C2+** — every customer-facing query must be account-scoped with dedicated IDOR/isolation tests before the portal ships to production (currently local only).
+>
 > **🟢 Production (2026-07-14):** deployed on Vercel with **Neon Postgres** + a **public Vercel Blob** store. Secrets (`AUTH_SECRET`, DB URLs, Blob token) are Vercel-managed env vars, never in the repo; Neon's connection strings are *sensitive* (not pullable locally). HTTPS is enforced by Vercel. **Two accepted-risk items in the current prod instance:** (1) the seed loaded **demo `@dcs.example` staff accounts** (shared password `Password123!`) — deactivate them via Admin → Users before real use; (2) Blob is **public-access**, so a photo URL is reachable by anyone who has the (random) URL — move to private blobs + signed URLs if strict privacy is required.
 >
 > **Status — 2026-07-14 (through Phase 7 — security review complete):**

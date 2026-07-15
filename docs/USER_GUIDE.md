@@ -4,6 +4,8 @@
 
 Two audiences: **customers** (public, no account) and **staff** (Employee / Manager / Principal Administrator).
 
+> **Coming soon — customer app (`/app`):** a mobile iPhone-style portal where customers sign in with a passwordless email code to track their projects and message the team. Foundation is built (local only); see [CLIENT_APP_PLAN.md](CLIENT_APP_PLAN.md).
+
 ---
 
 ## For customers

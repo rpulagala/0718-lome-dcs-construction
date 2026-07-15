@@ -17,6 +17,18 @@ Local dev runs at **http://localhost:3000** (`npm run dev` from the project root
 
 > The public nav's **Home / Construction Services / Contact / DCS** links point to the live client site (dcsconstructs.com); **Staff** goes to the sign-in below.
 
+## 📱 Client app / customer portal (`/app`) — local only, not deployed
+Mobile-first iPhone-style PWA. **C0/C1 foundation only** (see [docs/CLIENT_APP_PLAN.md](docs/CLIENT_APP_PLAN.md)).
+
+| Page | URL |
+|---|---|
+| Sign in (passwordless email code) | http://localhost:3000/app/signin |
+| Home (gated) | http://localhost:3000/app |
+| Projects / Messages (placeholders) | http://localhost:3000/app/projects · /app/messages |
+| Profile (name/email + sign out) | http://localhost:3000/app/profile |
+
+> **Customer login = passwordless:** enter email → a 6-digit code is emailed (in dev, `sendEmail` logs the code to the server console). No password. Signing in with a seeded customer's email (e.g. `eleanor.w@example.com`) auto-links that customer's existing requests to the new portal account.
+
 ## Internal console (login required — navy menu bar, left-aligned)
 | Page | URL | Min role |
 |---|---|---|
